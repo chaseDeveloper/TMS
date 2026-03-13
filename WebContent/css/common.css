@@ -1,0 +1,120 @@
+@charset "utf-8";
+
+@import url('font.css');
+@import url('ui_content2.css');
+
+
+
+/*입력_검색 영역*/
+.form_warp {     
+	position: relative;
+	float: left;
+	width: 95%;
+    padding: 1px 0 1px 6px;
+    margin:0;
+	
+}
+.form_warp ul {
+    position: relative;
+}
+.form_warp li {
+    display:inline-block;
+    padding:3px 0 3px 0;
+    margin-right:20px;
+    vertical-align: middle;
+}
+li > span{
+	vertical-align: middle;
+}
+.search_btn {
+	position: relative;
+	float: right;
+    width: 50px;
+    vertical-align: middle;
+    text-align: center;
+    padding:0 0 0 1px;
+}
+
+
+.input_title{
+    font-size:15px;
+    padding:0 10px 0 14px;
+    color:#303030;
+	font-weight: 600;
+    letter-spacing:-1px;
+    display:inline-block;
+	background:url(../images/icon_list01.png) no-repeat 0 50%;
+}
+
+	
+
+
+.form_warp select {
+    height: 36px;
+    min-width: 120px;
+    font-size: 15px;
+    padding: 0 30px 0 10px;
+    color: #333232;
+    border: 1px solid #ccc;	
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    -ms-appearance: none;
+    background: #fff url("../images/select_arrow.png") no-repeat right;
+}
+.form_warp select:focus {outline:none; border-color:#717171;}
+
+
+.form_warp input {
+    height: 36px;
+	width: 240px;
+    padding: 10px;
+    font-size: 15px;
+    color: #333232;
+    border: 1px solid #ccc;	
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    -ms-appearance: none;
+}
+
+.form_warp input:focus {outline:none; border-color:#717171;}
+
+/* 체크박스 스타일 초기화 */
+.form_warp input[type="checkbox"] {
+    appearance: auto;
+    -webkit-appearance: checkbox;
+    -moz-appearance: checkbox;
+    -o-appearance: checkbox;
+    -ms-appearance: checkbox;
+    width: auto;
+    height: auto;
+    padding: 0;
+    border: none;
+}
+
+/*css 로더 위치*/
+.popBack {
+	position:fixed;
+	width:100%;
+	height:100%;
+	padding:10px;
+	z-index:9999;
+	top:0px;
+	left:0px;
+	box-sizing: border-box;
+	display:none;
+	background-color: rgba(255, 255, 255, 0.8);
+	
+}
+
+.popFlex {
+	display:flex;
+	justify-content: center;
+	width:100%;
+	height:100%;
+	align-items: center;
+	flex:1;
+}

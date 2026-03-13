@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.poolSbmt.maps.PoolSbmtMapper">
+
+	<!-- 기피제척 대학 목록 조회 -->
+	<select id="selectPoolDisqUnivList" parameterType="map" resultType="map">
+		SELECT
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD,
+		    A.USR_ID,
+		    A.DISQ_DIV,
+		    A.SEQ,
+		    A.DISQ_UNIV_CD,
+		    B.UNIV_NM AS DISQ_UNIV_NM,
+		    A.INPT_ID,
+		    A.INPT_DT
+		FROM
+		    EVA_POOL_DISQ_UNIV A
+		JOIN
+		    (
+		        SELECT DISTINCT UNIV_CD, UNIV_NM
+		        FROM EVA_UNIV
+		    ) B
+		ON
+		    A.DISQ_UNIV_CD = B.UNIV_CD
+		WHERE
+		    A.PERIOD_DIV_CD = #{periodDivCd}
+		    AND A.EVA_YEAR = #{evaYear}
+		    AND A.POOL_CD = #{poolCd}
+		    AND A.USR_ID = #{usrId}
+		    AND A.DISQ_DIV = #{disq_div}
+		ORDER BY
+		    A.SEQ
+	</select>
+
+	<insert id="insertPoolDisqUnivInfo" parameterType="map" flushCache="true">
+		<selectKey keyProperty="SEQ" resultType="int" order="BEFORE">
+		    SELECT
+		        NVL(MAX(SEQ), 0) + 1 AS SEQ
+		    FROM
+		        EVA_POOL_DISQ_UNIV
+		    WHERE
+		        PERIOD_DIV_CD = #{periodDivCd}
+		        AND EVA_YEAR = #{evaYear}
+		        AND POOL_CD = #{poolCd}
+		        AND USR_ID = #{usrId}
+		        AND DISQ_DIV = #{disq_div}
+		</selectKey>
+		
+		INSERT INTO EVA_POOL_DISQ_UNIV (
+		    DI,
+		    PERIOD_DIV_CD,
+		    EVA_YEAR,
+		    POOL_CD,
+		    USR_ID,
+		    DISQ_DIV,
+		    SEQ,
+		    DISQ_UNIV_CD,
+		    INPT_ID,
+		    INPT_DT
+		) VALUES (
+		    #{di},
+		    #{periodDivCd},
+		    #{evaYear},
+		    #{poolCd},
+		    #{usrId},
+		    #{disq_div},
+		    #{SEQ},
+		    #{disqUnicCd},
+		    #{usrId},
+		    SYSDATE
+		)
+	</insert>
+
+	<delete id="deletePoolDisqUnivList" parameterType="map" flushCache="true">
+		DELETE FROM EVA_POOL_DISQ_UNIV
+		WHERE
+		    PERIOD_DIV_CD = #{periodDivCd}
+		    AND EVA_YEAR = #{evaYear}
+		    AND POOL_CD = #{poolCd}
+		    AND USR_ID = #{usrId}
+	</delete>
+
+	<select id="selectPoolApplList1" parameterType="map" resultType="map">
+		SELECT 
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD,
+		    EC.CODE_NM,
+		    A.POOL_CD_NM,
+		    B.NAME,
+		    B.USR_ID,
+		    A.ST_DT,
+		    A.ED_DT,
+		    B.APPL_YN,
+		    TO_CHAR(APPL_YN_DT, 'YYYY-MM-DD HH24:MI') AS APPL_YN_DT,
+		    A.STATUS_CD,
+		    B.DISQ_YN_1,
+		    B.DISQ_YN_2
+		FROM EVA_POOL_SCHE A
+		LEFT OUTER JOIN EVA_POOL_APPL B
+		    ON A.PERIOD_DIV_CD = B.PERIOD_DIV_CD
+		    AND A.EVA_YEAR = B.EVA_YEAR
+		    AND A.POOL_CD = B.POOL_CD
+		    AND B.USR_ID = #{usrId}
+		LEFT JOIN EVA_CODE EC
+		    ON A.POOL_CD = EC.ORG_CD
+		    AND EC.GROUP_CD = 'POOL_CD'
+		WHERE A.STATUS_CD = 'Y'
+		    AND TO_CHAR(SYSDATE, 'YYYYMMDDHH24MI') BETWEEN A.ST_DT AND A.ED_DT
+		ORDER BY A.PERIOD_DIV_CD, A.EVA_YEAR, A.POOL_CD
+	</select>
+
+	<select id="selectPoolApplList2" parameterType="map" resultType="map">
+		SELECT 
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD,
+		    EC.CODE_NM,
+		    A.POOL_CD_NM,
+		    B.NAME,
+		    B.USR_ID,
+		    A.ST_DT,
+		    A.ED_DT,
+		    B.APPL_YN,
+		    TO_CHAR(APPL_YN_DT, 'YYYY-MM-DD HH24:MI') AS APPL_YN_DT,
+		    A.STATUS_CD,
+		    B.DISQ_YN_1,
+		    B.DISQ_YN_2
+		FROM EVA_POOL_SCHE A
+		LEFT OUTER JOIN EVA_POOL_APPL B
+		    ON A.PERIOD_DIV_CD = B.PERIOD_DIV_CD
+		    AND A.EVA_YEAR = B.EVA_YEAR
+		    AND A.POOL_CD = B.POOL_CD
+		    AND B.USR_ID = #{usrId}
+		LEFT JOIN EVA_CODE EC
+		    ON A.POOL_CD = EC.ORG_CD
+		    AND EC.GROUP_CD = 'POOL_CD'
+		WHERE A.STATUS_CD = 'Y'
+		    AND TO_CHAR(SYSDATE, 'YYYYMMDDHH24MI') BETWEEN A.ST_DT AND A.ED_DT
+		    AND EC.CODE IN ('10520001', '10520003', '10520005')
+		ORDER BY 
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD
+	</select>
+
+	<select id="selectUsrJobCd" parameterType="map" resultType="string">
+		SELECT JOB_CD FROM EVA_POOL_M WHERE DI = #{di}
+	</select>
+	
+	<select id="selectUsrFileId" parameterType="map" resultType="string">
+		SELECT FILE_ID FROM EVA_POOL_M WHERE DI = #{di}
+	</select>
+
+	<update id="savePoolApplInfo" parameterType="map" flushCache="true">
+		MERGE INTO EVA_POOL_APPL A
+		USING DUAL
+		ON (
+		    A.PERIOD_DIV_CD = #{periodDivCd}
+		    AND A.EVA_YEAR = #{evaYear}
+		    AND A.POOL_CD = #{poolCd}
+		    AND A.USR_ID = #{usrId}
+		)
+		WHEN MATCHED THEN
+		    UPDATE
+		    SET 
+		        POOL_CD_NM = #{poolCdNm},
+		        NAME = #{name},
+		        APPL_YN = #{applYn},
+		        APPL_YN_DT = SYSDATE,
+		        LAST_CHNRG_ID = #{usrId},
+		        LAST_CHG_DT = SYSDATE
+		WHEN NOT MATCHED THEN
+		    INSERT (
+		        DI, PERIOD_DIV_CD, EVA_YEAR, POOL_CD,
+		        POOL_CD_NM, USR_ID, NAME,
+		        APPL_YN, APPL_YN_DT, SEC_PLEDGE_YN, INPT_ID, INPT_DT, DISQ_YN_1, DISQ_YN_2
+		    ) VALUES (
+		        #{di}, #{periodDivCd}, #{evaYear}, #{poolCd},
+		        #{poolCdNm}, #{usrId}, #{name},
+		        #{applYn}, SYSDATE, 'N', #{usrId}, SYSDATE, #{disq1Univ}, #{disq2Univ}
+		    )
+	</update>
+
+	<update id="updatePoolDisqYNInfo" parameterType="map">
+		UPDATE EVA_POOL_APPL
+		SET 
+		    DISQ_YN_1 = #{disq1Univ},
+		    DISQ_YN_2 = #{disq2Univ},
+		    LAST_CHNRG_ID = #{usrId},
+		    LAST_CHG_DT = SYSDATE
+		WHERE 
+		    PERIOD_DIV_CD = #{periodDivCd}
+		    AND EVA_YEAR = #{evaYear}
+		    AND POOL_CD = #{poolCd}
+		    AND USR_ID = #{usrId}
+	</update>
+
+	<select id="getScheduleInfo" parameterType="String" resultType="map">
+		SELECT
+		    PERIOD_DIV_CD,
+		    EVA_YEAR,
+		    POOL_CD,
+		    POOL_CD_NM,
+		    ST_DT,
+		    ED_DT,
+		    STATUS_CD,
+		    INPT_ID,
+		    INPT_DT
+		FROM 
+		    EVA_POOL_SCHE
+		WHERE 
+		    PERIOD_DIV_CD = #{periodDivCd}
+		    AND EVA_YEAR = #{evaYear}
+		    AND POOL_CD = #{poolCd}
+	</select>
+
+
+	<select id="selectSchlList" parameterType="map" resultType="map">
+		SELECT
+		    ROW_NUMBER() OVER (ORDER BY UNIV_NM) R_NUM,
+		    UNIV_CD,
+		    UNIV_NM
+		FROM
+		    EVA_UNIV
+		<where>
+		    AND (UNIV_NM LIKE '%' || #{searchText} || '%')
+		    AND EVA_TARGET = #{evaTarget}
+		</where>
+		ORDER BY
+		    UNIV_NM
+	</select>
+
+</mapper>

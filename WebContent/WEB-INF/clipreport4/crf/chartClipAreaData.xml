@@ -1,0 +1,16 @@
+<Dataset id="dsClipArea">
+	<ColumnInfo>
+		<Column id="IMG_CHART1_STR" type="STRING" size="35536" />
+		<Column id="IMG_CHART2_STR" type="STRING" size="35536" />
+		<Column id="CHART_STR" type="STRING" size="4000" />
+		<Column id="UNIV_CD_NM" type="STRING" size="100" />
+	</ColumnInfo>
+	<Rows>
+		<Row>
+			<Col id="IMG_CHART1_STR"></Col>
+			<Col id="IMG_CHART2_STR"></Col>
+			<Col id="CHART_STR"></Col>
+			<Col id="UNIV_CD_NM"></Col>
+		</Row>
+	</Rows>
+</Dataset>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>    
+    <Appenders>
+
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %5p [%c] %m%n" />
+        </Console>
+        
+        <RollingFile name="RollingFile">
+			<FileName>/files/tms.log</FileName>
+ 			<FilePattern>/files/%d{yyyy-MM-dd-hh-mm}.log</FilePattern>
+			<PatternLayout>
+				<Pattern>%d{yyyy-MMM-dd HH:mm:ss a} [%t] %-5level %logger{36} - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy max="5" />
+		</RollingFile>
+        
+    </Appenders>
+    
+    
+    <Loggers>
+    
+    	<Logger name="necte" level="INFO">
+    		<AppenderRef ref="console" />
+		</Logger>
+		
+		
+        <Root level="INFO">
+            <AppenderRef ref="console" />
+			<AppenderRef ref="RollingFile" /> 
+        </Root>
+    </Loggers>
+</Configuration>

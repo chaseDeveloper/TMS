@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.0">
+  <Form id="ClipView" width="1280" height="720" titletext="New Form">
+    <Layouts>
+      <Layout height="720" mobileorientation="landscape" width="1280">
+        <Button id="Button00" taborder="0" text="Button00" left="14" top="19" width="168" height="43" onclick="Button00_onclick"/>
+        <WebBrowser id="WebBrowser00" taborder="1" left="14" top="70" width="1058" height="620" onloadcompleted="WebBrowser00_onloadcompleted" onusernotify="WebBrowser00_onusernotify"/>
+      </Layout>
+    </Layouts>
+    <Script type="xscript5.1"><![CDATA[this.Button00_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+	//크로스 도메인 설정 (byPass)
+	//this.WebBrowser00.set_url("http://localhost:8080/Hello/ReportTo.jsp");
+	//this.WebBrowser00.set_url("http://localhost:8080/Hello/createJSPReport.jsp");
+	this.WebBrowser00.set_url("http://localhost:8088/ClipReport4_nex/test.jsp");
+	
+};
+
+this.WebBrowser00_onloadcompleted = function(obj:nexacro.WebBrowser,e:nexacro.WebLoadCompEventInfo)
+{
+	var doc = this.WebBrowser00.getProperty("document");
+
+	//리포트 이름
+	var crfName   = doc.callMethod("getElementById", "crfName");
+	crfName.setProperty("value", "nexaMemo");
+
+	//리포트 매개변수 필드
+	var crfParams = doc.callMethod("getElementById", "crfParams");
+	crfParams.setProperty("value", "DEPARTMENT_ID:100|TEST:한글테스트");
+
+	//데이터 타입(DB, MEMO(String), HTTP, FILE)
+	var callType   = doc.callMethod("getElementById", "callType");
+	callType.setProperty("value", "memo");        	
+
+	//데이터(dbname, crfData(xml/csv/json), httpPath, filePath) 
+	var crfData = doc.callMethod("getElementById", "crfData");
+	crfData.setProperty("value", this.Dataset00.saveXML());
+	
+	var docBtn = doc.callMethod("getElementById","btnClick"); //ClipReport jsp Page버튼지정
+	docBtn.callMethod("click"); 
+	
+	//doc.callMethod("onload");
+};
+
+
+this.WebBrowser00_onusernotify = function(obj:nexacro.WebBrowser,e:nexacro.WebUserNotifyEventInfo)
+{
+	alert(e.userdata);
+};
+]]></Script>
+    <Objects>
+      <Dataset id="Dataset00">
+        <ColumnInfo>
+          <Column id="id" type="STRING" size="256"/>
+          <Column id="name" type="STRING" size="256"/>
+          <Column id="age" type="STRING" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="id">01</Col>
+            <Col id="name">홍길동</Col>
+            <Col id="age">20</Col>
+          </Row>
+          <Row>
+            <Col id="id">02</Col>
+            <Col id="name">김길동</Col>
+            <Col id="age">20</Col>
+          </Row>
+          <Row>
+            <Col id="id">03</Col>
+            <Col id="name">홍길순</Col>
+            <Col id="age">2</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+    </Objects>
+  </Form>
+</FDL>

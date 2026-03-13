@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.adminAccess.maps.AdminAccessMapper">
+<!-- 		<select id="getAdminAccessList" parameterType="map" resultType="map" flushCache="false">
+		    SELECT *
+		    FROM (
+		        SELECT A.*
+		        FROM EVA_HIS A
+		        WHERE A.PRIVACY_YN = 'Y'
+		        ORDER BY A.INPT_DT DESC
+		    )
+		    WHERE ROWNUM &lt;= 100
+		    <if test="sMultiSearchStr == 'true'">
+		        UNION ALL
+		        SELECT *
+		        FROM EVA_HIS
+		        WHERE PRIVACY_YN = 'Y'
+		        ORDER BY INPT_DT DESC
+		    </if>
+		</select> -->
+		
+		<select id="getAdminAccessList" parameterType="map" resultType="map">
+		    SELECT
+		        HIS_NO,
+		        RMRK,
+		        UNIV_NM,
+		        TO_CHAR(INPT_DT, 'YYYY-MM-DD HH24:MI') AS INPT_DT
+		    FROM EVA_HIS
+		    WHERE PRIVACY_YN = 'Y'
+		      <if test="sMultiSearchStr == 'true'">
+		          AND RMRK LIKE '%리스트%'
+		      </if>
+		    ORDER BY INPT_DT DESC
+		</select>
+
+		
+		<select id="getSubjectEmail" parameterType="map" resultType="map" flushCache="false">
+			SELECT
+				USR_ID
+			FROM EVA_POOL_M
+			WHERE NAME = #{name}
+		</select>	
+	</mapper>

@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.adminSchedule.maps.AdminScheduleMapper">	
+
+	<resultMap id="sign_clob" type="Map">
+   	 	<result property="SIGN_1" column="SIGN_1" jdbcType="CLOB" javaType="java.lang.String" />
+	</resultMap>
+	
+	<select id="getAdminScheList" parameterType="map" resultType="map" flushCache="false">		
+		SELECT
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD,
+		    EC.CODE_NM AS POOL_CODE_NM,
+		    A.POOL_CD_NM,
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'YYYY-MM-DD') AS ST_DATE,
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'HH24:MI') AS ST_TIME,
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'HH24') AS ST_HOUR,
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'MI') AS ST_MINUTE,
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'YYYY-MM-DD') AS ED_DATE,
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'HH24:MI') AS ED_TIME,
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'HH24') AS ED_HOUR,
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'MI') AS ED_MINUTE,
+		    A.STATUS_CD,
+		    COUNT(B.PERIOD_DIV_CD) AS APPLICATION_COUNT
+		FROM
+		    EVA_POOL_SCHE A
+		LEFT OUTER JOIN
+		    EVA_POOL_APPL B ON A.PERIOD_DIV_CD = B.PERIOD_DIV_CD
+		                     AND A.EVA_YEAR = B.EVA_YEAR
+		                     AND A.POOL_CD = B.POOL_CD
+		                     AND B.APPL_YN = 'Y'
+		                     
+		LEFT JOIN
+		    EVA_CODE EC ON A.POOL_CD = EC.ORG_CD AND EC.GROUP_CD = 'POOL_CD'                      
+		GROUP BY
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD,
+		    EC.CODE_NM,
+		    A.POOL_CD_NM,
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'YYYY-MM-DD'),
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'HH24:MI'),
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'HH24'),
+		    TO_CHAR(TO_DATE(A.ST_DT, 'YYYYMMDDHH24MI'), 'MI'),
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'YYYY-MM-DD'),
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'HH24:MI'),
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'HH24'),
+		    TO_CHAR(TO_DATE(A.ED_DT, 'YYYYMMDDHH24MI'), 'MI'),
+		    A.STATUS_CD
+		ORDER BY
+		    A.PERIOD_DIV_CD DESC,
+		    A.EVA_YEAR DESC,
+		    A.POOL_CD DESC
+	</select>
+					
+	
+	<insert id="insertPoolSchedule" parameterType="map" >		
+		INSERT INTO EVA_POOL_SCHE (
+			PERIOD_DIV_CD,
+			EVA_YEAR,
+			POOL_CD,
+			POOL_CD_NM,
+			ST_DT,
+			ED_DT,
+			STATUS_CD,
+			INPT_ID,
+			INPT_DT			
+		) VALUES (
+			#{periodDivCd},
+			#{evaYear},
+			#{poolCd},
+			#{poolCdNm},
+			#{startDateTime},
+			#{endDateTime},
+			#{statusCd},
+			#{usrId},
+			sysdate				
+		)	
+		
+	</insert>		
+	
+	<update id="updatePoolSchedule" parameterType="map">
+		UPDATE EVA_POOL_SCHE
+	 	SET
+	 	POOL_CD_NM = #{poolCdNm}
+		,ST_DT = #{startDateTime} 
+		,ED_DT = #{endDateTime}
+		,STATUS_CD = #{statusCd}
+		, LAST_CHNRG_ID = #{usrId}		
+		, LAST_CHG_DT = sysdate
+	 	WHERE 
+	 		PERIOD_DIV_CD = #{periodDivCd}
+		    AND EVA_YEAR = #{evaYear}
+			AND POOL_CD = #{poolCd}
+	</update>
+	
+	
+	<select id="poolCdList" parameterType="map" resultType="map">		
+		SELECT			
+		      CODE                
+             , CODE_NM             
+             , ORG_CD				  
+        FROM 
+        	EVA_CODE
+        WHERE 
+        	GROUP_CD ='POOL_CD'
+            AND ORG_CD IS NOT NULL
+         ORDER BY  CODE			
+	</select>
+	
+	<select id="isExistPoolSchedule" parameterType="map" resultType="boolean" useCache="false" flushCache="false">
+		SELECT
+			COUNT(*)
+		FROM
+			EVA_POOL_SCHE 
+		WHERE
+			PERIOD_DIV_CD = #{periodDivCd}
+			AND EVA_YEAR = #{evaYear}
+			AND POOL_CD = #{poolCd}
+	</select>	
+	
+	<delete id="deletePoolSchedule" parameterType="map">
+		DELETE FROM EVA_POOL_SCHE
+		WHERE
+			PERIOD_DIV_CD = #{periodDivCd}
+			AND EVA_YEAR = #{evaYear}
+			AND POOL_CD = #{poolCd}
+	</delete>
+	
+	<select id="getAdminPoolList" parameterType="map" resultType="map" flushCache="false">	
+		SELECT
+		    PM.DI,
+		    PM.ROLE,
+		    PM.USR_ID,
+		    PM.PRIV_YN,
+		    PM.PRIV_DTTM,
+		    PM.QUAN_YN,
+		    PM.QUAL_YN,		   
+		    PM.NAME,
+		    PM.GENDER,
+		    PM.TEL_HP,
+		    PM.BIRTHDAY,
+		    PM.UNIV_CD,
+		    (SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = PM.UNIV_CD) AS UNIV_NM,
+		    PM.POSITION,
+		    PM.DEPT,
+		    PM.EMAIL,
+		    PM.RESUME_1,
+		    PM.RESUME_2,
+		    PM.JOB_CD,
+		    CASE WHEN TO_CHAR(PM.JOB_CD) = '1' THEN '교수'
+		         WHEN TO_CHAR(PM.JOB_CD) = '2' THEN '교직원'
+		         ELSE '기타'
+		    END AS JOB_TITLE,
+		    PM.UNIV_DIV,		    
+		    CASE
+		        WHEN PM.UNIV_DIV IS NOT NULL THEN (SELECT DISTINCT UNIV_TYPE_NM FROM E6_EDNST_ADDR_M WHERE UNIV_TYPE_CD = PM.UNIV_DIV)
+		        ELSE NULL
+		    END AS UNIV_DIV_NM,
+		    PM.CTPV_CD,
+		    CASE
+		        WHEN PM.CTPV_CD IS NOT NULL THEN (SELECT DISTINCT CTPV_NM FROM E6_EDNST_ADDR_M WHERE CTPV_CD = PM.CTPV_CD)
+		        ELSE NULL
+		    END AS CTPV_CD_NM,
+		    PM.DEL_YN,
+            PA.DISQ_YN_1,
+		    PA.DISQ_YN_2,
+		    PA.APPL_YN,
+		    PA.APPL_YN_DT,
+		    PA.SEL_RSLT,
+		    PA.SEC_PLEDGE_YN,
+		    TO_CHAR(PA.SEC_PLEDGE_YN_DT, 'YYYY-MM-DD HH24:MI') AS SEC_PLEDGE_YN_DT,
+		    LISTAGG(CASE WHEN PDU.DISQ_DIV = '1' THEN PDU.DISQ_UNIV_CD ELSE NULL END, ', ') WITHIN GROUP (ORDER BY PDU.DISQ_UNIV_CD) AS DISQ_UNIV_CD_1,
+		    LISTAGG(CASE WHEN PDU.DISQ_DIV = '1' THEN (SELECT DISTINCT UNIV_NM FROM EVA_UNIV WHERE UNIV_CD = PDU.DISQ_UNIV_CD) ELSE NULL END, ', ') WITHIN GROUP (ORDER BY PDU.DISQ_UNIV_CD) AS DISQ_UNIV_NM_1,
+		    LISTAGG(CASE WHEN PDU.DISQ_DIV = '2' THEN PDU.DISQ_UNIV_CD ELSE NULL END, ', ') WITHIN GROUP (ORDER BY PDU.DISQ_UNIV_CD) AS DISQ_UNIV_CD_2,
+		    LISTAGG(CASE WHEN PDU.DISQ_DIV = '2' THEN (SELECT DISTINCT UNIV_NM FROM EVA_UNIV WHERE UNIV_CD = PDU.DISQ_UNIV_CD) ELSE NULL END, ', ') WITHIN GROUP (ORDER BY PDU.DISQ_UNIV_CD) AS DISQ_UNIV_NM_2,           	
+            EC1.CODE_NM AS A_UNIV,
+		    A.MAJOR AS A_MAJOR,
+		    EC2.CODE_NM AS B_UNIV,
+		    B.MAJOR AS B_MAJOR,
+		    EC3.CODE_NM AS C_UNIV,
+		    C.MAJOR AS C_MAJOR,
+            PA.PERIOD_DIV_CD,
+            PA.EVA_YEAR,
+            PA.POOL_CD,
+            PM.FILE_ID,
+            MAX((SELECT ORG_FILE_NAME FROM EVA_FILE WHERE FILE_ID = PM.FILE_ID AND FILE_SEQ = '0001')) AS FILE_NM
+        FROM
+		    EVA_POOL_M PM
+		LEFT OUTER JOIN EVA_POOL_APPL PA ON PM.DI = PA.DI 
+			AND PA.PERIOD_DIV_CD = #{periodDivCd} 
+			AND PA.EVA_YEAR = #{evaYear}
+			AND PA.POOL_CD = #{poolCd}
+		LEFT OUTER JOIN EVA_POOL_DISQ_UNIV PDU ON PM.DI = PDU.DI 
+			AND PDU.PERIOD_DIV_CD = #{periodDivCd} 
+			AND PDU.EVA_YEAR = #{evaYear}
+			AND PDU.POOL_CD = #{poolCd}
+        LEFT JOIN EVA_POOL_DEGREE A ON PM.DI = A.DI AND A.SEQ = 1
+        LEFT JOIN EVA_POOL_DEGREE B ON PM.DI = B.DI AND B.SEQ = 2
+        LEFT JOIN EVA_POOL_DEGREE C ON PM.DI = C.DI AND C.SEQ = 3  
+        LEFT JOIN eva_code EC1 ON A.UNIV_CD = EC1.org_cd AND EC1.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		LEFT JOIN eva_code EC2 ON B.UNIV_CD = EC2.org_cd AND EC2.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		LEFT JOIN eva_code EC3 ON C.UNIV_CD = EC3.org_cd AND EC3.group_cd = 'LAST_DEG_ACQS_SCHL_CD'  
+		WHERE
+		   PA.APPL_YN = 'Y'
+		GROUP BY
+            PM.DI, PM.ROLE, PM.USR_ID, PM.PRIV_YN, PM.PRIV_DTTM, PM.QUAN_YN, PM.QUAL_YN, PM.NAME, PM.GENDER,PM.TEL_HP, PM.BIRTHDAY, PM.UNIV_CD, PM.JOB_NM, PM.POSITION, PM.DEPT, 
+            PM.EMAIL, PM.RESUME_1, PM.RESUME_2, PM.JOB_CD, PM.UNIV_DIV, PM.CTPV_CD, PM.DEL_YN,PM.UNIV_DIV, PM.CTPV_CD,
+            PA.DISQ_YN_1, PA.DISQ_YN_2, PA.APPL_YN, PA.APPL_YN_DT, PA.SEL_RSLT, PA.SEC_PLEDGE_YN, PA.SEC_PLEDGE_YN_DT,
+            EC1.CODE_NM, A.MAJOR,  EC2.CODE_NM, B.MAJOR, EC3.CODE_NM, C.MAJOR, PA.PERIOD_DIV_CD, PA.EVA_YEAR, PA.POOL_CD,PM.FILE_ID
+        ORDER BY PM.NAME, PM.USR_ID     
+	</select>	
+	
+	<update id="updataYNSelect" parameterType="map">
+		UPDATE EVA_POOL_APPL
+	 	SET
+	 	SEL_RSLT = #{selRslt}
+		WHERE 
+	 		PERIOD_DIV_CD = #{periodDivCd}
+		    AND EVA_YEAR = #{evaYear}
+			AND POOL_CD = #{poolCd}
+			AND DI = #{usrDi}
+	</update>
+	
+	<select id="getAdminPoolPrint" parameterType="map" resultType="map" flushCache="false" resultMap="sign_clob">
+		SELECT
+		    A.DI,
+		    A.PERIOD_DIV_CD,
+		    A.EVA_YEAR,
+		    A.POOL_CD,
+		    A.POOL_CD_NM,
+		    EC.CODE_NM,
+		    A.USR_ID,
+		    A.NAME,
+		    M.UNIV_CD,
+		    (SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = M.UNIV_CD) AS UNIV_CD_NM,
+		    M.POSITION,
+		    A.APPL_YN,
+		    A.APPL_YN_DT,
+		    A.DISQ_YN_1,
+		    A.DISQ_YN_2,
+		    A.SEL_RSLT,
+		    A.SEC_PLEDGE_YN,
+		    A.SEC_PLEDGE_YN_DT,
+		    A.SIGN_1,
+		    A.DEL_YN,
+		    A.INPT_ID,
+		    A.INPT_DT,
+		    A.LAST_CHNRG_ID,
+		    A.LAST_CHG_DT
+		FROM
+		    EVA_POOL_APPL A
+		LEFT JOIN
+		    EVA_CODE EC ON A.POOL_CD = EC.ORG_CD AND EC.GROUP_CD = 'POOL_CD'
+		LEFT JOIN 
+			EVA_POOL_M M
+			ON A.DI = M.DI     
+		WHERE
+		    A.DI = #{di}
+		    AND A.PERIOD_DIV_CD = #{periodDivCd}
+		    AND A.EVA_YEAR = #{evaYear}
+		    AND A.POOL_CD = #{poolCd}			
+	</select>	
+
+		
+</mapper>

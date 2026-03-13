@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.join.maps.JoinMapper">
+	
+	
+	<select id="selectPoolScheList" parameterType="map" resultType="map" flushCache="false">
+		
+		SELECT *
+			FROM (
+			    SELECT 
+			        ROW_NUMBER() OVER (ORDER BY A.EVA_YEAR DESC,A.POOL_CD DESC) R_NUM,
+			        A.PERIOD_DIV_CD,
+			        A.EVA_YEAR,
+			        A.POOL_CD,
+			        (SELECT CODE_NM FROM EVA_CODE WHERE GROUP_CD = 'POOL_CD' AND CODE = A.POOL_CD) AS POOL_CODE_NM,
+			        A.POOL_CD_NM,
+			        TO_CHAR(TO_DATE(SUBSTR(A.ST_DT, 1, 8), 'YYYYMMDD'), 'YYYY"년" MM"월" DD"일"') AS ST_YMD,
+                    TO_CHAR(TO_DATE(SUBSTR(A.ED_DT, 1, 8), 'YYYYMMDD'), 'YYYY"년" MM"월" DD"일"') AS ED_YMD,
+			        A.STATUS_CD
+			    FROM EVA_POOL_SCHE A
+			    WHERE A.STATUS_CD = 'N'
+		 ) 
+		  WHERE 
+		  R_NUM BETWEEN #{start_no} AND #{last_no}
+	</select>
+	
+	<select id="selectPoolInfo" parameterType="map" resultType="map" flushCache="false">
+		SELECT
+		    DI,
+		    ROLE,
+		    USR_ID,
+		    PRIV_YN,
+		    PRIV_DTTM,
+		    QUAN_YN,
+		    QUAL_YN,
+		    DISQ_YN_1,
+		    DISQ_UNIV_CD_1,
+		    DISQ_YN_2,
+		    DISQ_UNIV_CD_2,
+		    NAME,
+		    GENDER,
+		    TEL_HP,
+		    TEL_HOME,
+		    BIRTHDAY,
+		    ADDR_HOME_ZIPCODE,
+		    ADDR_HOME,
+		    ADDR_HOME_DETAIL,
+		    UNIV_CD,
+		    JOB_NM,
+		    POSITION,
+		    DEPT,
+		    EMAIL,
+		    ADDR_JOB_ZIPCODE,
+		    ADDR_JOB,
+		    ADDR_JOB_DETAIL,
+		    TEL_JOB,
+		    RESUME_1,
+		    RESUME_2,
+		    EDU_DIV,
+		    JOB_CD,
+		    UNIV_DIV,
+		    CTPV_CD,
+		    DEL_YN,
+		    INPT_ID,
+		    INPT_DT,
+		    LAST_CHNRG_ID,
+		    LAST_CHG_DT
+		FROM
+		    EVA_POOL_M
+		WHERE      
+			TEL_HP   = #{telHp}
+	 		AND NAME = #{name}
+	</select>		
+	
+	<insert id="insertPoolInfo" parameterType="map" >	
+		
+		INSERT INTO EVA_POOL_M (
+			DI
+			,ROLE
+			,PRIV_YN
+			,PRIV_DTTM
+			,NAME
+			,GENDER
+			,TEL_HP
+			,BIRTHDAY
+			,INPT_ID			
+			,INPT_DT
+		) VALUES (
+			#{di}
+			,'U'
+			,'Y'
+			,sysdate
+			,#{name}
+			,#{gender}
+			,#{telHp}
+			,#{birthDay}
+			,#{sname}
+			,sysdate					
+		)	
+		
+	</insert>		
+	
+	<update id="updatePoolInfo" parameterType="map">
+		UPDATE EVA_POOL_M
+	 	SET
+	 	DI 	= #{di}
+	 	, PRIV_YN 	= 'Y'	 	
+		, PRIV_DTTM = sysdate
+		, NAME   = #{name}
+		, GENDER  = #{gender}		
+		, BIRTHDAY  = #{birthDay}
+		, INPT_ID = #{sname}		
+		, INPT_DT = sysdate		
+		, LAST_CHG_DT = sysdate
+	 	WHERE 
+	 		TEL_HP   = #{telHp}
+	 		AND NAME = #{name}
+	</update>
+	
+	<update id="updatePoolDegree" parameterType="map">
+		UPDATE EVA_POOL_DEGREE
+	 	SET
+	 		DI 	= #{di}
+	 		, INPT_ID = #{sname}		
+		    , INPT_DT = sysdate			 	
+	 	WHERE 
+	 		USR_ID = #{usrId}
+	</update>
+	
+	<update id="updatePoolFulltimeTeacher" parameterType="map">
+		UPDATE EVA_POOL_FULLTIME_TEACHER
+	 	SET
+	 		DI 	= #{di}	
+	 		, INPT_ID = #{sname}		
+		    , INPT_DT = sysdate		 	
+	 	WHERE 
+	 		USR_ID = #{usrId}
+	</update>
+	
+	<update id="updatePoolEvaExp" parameterType="map">
+		UPDATE EVA_POOL_EVA_EXP
+	 	SET
+	 		DI 	= #{di}
+	 		, INPT_ID = #{sname}		
+		    , INPT_DT = sysdate			 	
+	 	WHERE 
+	 		USR_ID = #{usrId}
+	</update>
+	
+	<select id="isExistPoolTelHp" parameterType="map" resultType="boolean" useCache="false" flushCache="false">
+		SELECT
+			COUNT(*)
+		FROM
+			EVA_POOL_M 
+		WHERE
+			NAME = #{name}
+			AND TEL_HP = #{telHp}
+	</select>	
+	
+	
+		
+</mapper>

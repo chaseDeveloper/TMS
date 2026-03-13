@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jeus-system xmlns="http://www.tmaxsoft.com/xml/ns/jeus" version="6.0">
+    <node>
+        <name>necte</name>
+        <class-ftp>true</class-ftp>
+        <sequential-start>true</sequential-start>
+        <enable-webadmin>true</enable-webadmin>
+
+        <engine-container>
+            <name>container1</name>
+            <command-option>
+                -Xms1024m -Xmx2048m -XX:MaxPermSize=128m
+                -Xbootclasspath/p:/usr/tmax/jennifer45/agent/lwst.jdk.jar:/usr/tmax/jennifer45/agent/lwst.boot.jar
+                -Djennifer.config=/usr/tmax/jennifer45/agent/nec.conf -javaagent:/usr/tmax/jennifer45/agent/misc/lwst.javaagent2.jar
+            </command-option>
+            <sequential-start>true</sequential-start>
+            <engine-command>
+                 <type>servlet</type>
+                 <name>engine1</name>
+            </engine-command>
+            <system-logging>
+                <level>INFO</level>
+                <handler>
+                    <file-handler>
+                        <name>fileHandler</name>
+                        <valid-day>1</valid-day>
+                        <buffer-size>0</buffer-size>
+                    </file-handler>
+                </handler>
+            </system-logging>
+        </engine-container>
+
+        <engine-container>
+            <name>container2</name>
+                <command-option>
+                    -Xms1024m -Xmx2048m -XX:MaxPermSize=128m
+                </command-option>
+            <sequential-start>true</sequential-start>
+            <engine-command>
+                 <type>servlet</type>
+                 <name>engine2</name>
+            </engine-command>
+            <system-logging>
+                <level>INFO</level>
+                <handler>
+                    <file-handler>
+                        <name>fileHandler</name>
+                        <valid-day>1</valid-day>
+                        <buffer-size>0</buffer-size>
+                    </file-handler>
+                </handler>
+            </system-logging>
+        </engine-container>
+<!--
+        <engine-container>
+            <name>container3</name>
+                <command-option>
+                    -Xms1024m -Xmx2048m -XX:MaxPermSize=128m
+                </command-option>
+            <sequential-start>true</sequential-start>
+            <engine-command>
+                 <type>servlet</type>
+                 <name>engine3</name>
+            </engine-command>
+            <system-logging>
+                <level>INFO</level>
+                <handler>
+                    <file-handler>
+                        <name>fileHandler</name>
+                        <valid-day>1</valid-day>
+                        <buffer-size>0</buffer-size>
+                    </file-handler>
+                </handler>
+            </system-logging>
+        </engine-container>
+
+        <engine-container>
+            <name>container4</name>
+            <command-option>
+                -Xms1024m -Xmx2048m -XX:MaxPermSize=128m
+
+                -Xbootclasspath/p:/usr/tmax/jennifer45/agent/lwst.jdk.jar:/usr/tmax/jennifer45/agent/lwst.boot.jar
+                -Djennifer.config=/usr/tmax/jennifer45/agent/nec.conf -javaagent:/usr/tmax/jennifer45/agent/misc/lwst.javaagent2.jar
+
+            </command-option>
+            <sequential-start>true</sequential-start>
+            <engine-command>
+                 <type>servlet</type>
+                 <name>engine4</name>
+            </engine-command>
+            <system-logging>
+                    <level>INFO</level>
+                    <handler>
+                        <file-handler>
+                            <name>fileHandler</name>
+                            <valid-day>1</valid-day>
+                            <buffer-size>0</buffer-size>
+                        </file-handler>
+                    </handler>
+            </system-logging>
+        </engine-container>
+-->
+    </node>
+
+    <resource>
+        <data-source>
+            <database>
+                <vendor>oracle</vendor>
+                <export-name>TEACH</export-name>
+                <data-source-class-name>oracle.jdbc.pool.OracleConnectionPoolDataSource</data-source-class-name>
+                <data-source-type>ConnectionPoolDataSource</data-source-type>
+                <data-source-name>oracle.jdbc.pool.OracleConnectionPoolDataSource</data-source-name>
+                <database-name>necte</database-name>
+                <port-number>1521</port-number>
+                <server-name>210.107.249.186</server-name>
+                <user>eva_third</user>
+                <password>didtjdvudrk512</password>
+                <property>
+                    <name>DriverType</name>
+                    <type>java.lang.String</type>
+                    <value>thin</value>
+                </property>
+                <connection-pool>
+                    <pooling>
+                        <min>5</min>
+                        <max>50</max>
+                        <step>5</step>
+                        <period>3600000</period>
+                    </pooling>
+                    <wait-free-connection>
+                        <enable-wait>true</enable-wait>
+                        <wait-time>30000</wait-time>
+                    </wait-free-connection>
+                    <check-query>select 1 from dual</check-query>
+                    <check-query-period>30000</check-query-period>
+                </connection-pool>
+                <auto-commit>true</auto-commit>
+                <stmt-query-timeout>300000</stmt-query-timeout>
+            </database>
+            <database> <!-- 수정필요 -->
+                <vendor>oracle</vendor>
+                <export-name>EVAL4TH</export-name>
+                <data-source-class-name>oracle.jdbc.pool.OracleConnectionPoolDataSource</data-source-class-name>
+                <data-source-type>ConnectionPoolDataSource</data-source-type>
+                <data-source-name>oracle.jdbc.pool.OracleConnectionPoolDataSource</data-source-name>
+                <database-name>necte</database-name>
+                <port-number>1521</port-number>
+                <server-name>210.107.249.186</server-name>
+                <user>eva4rd</user>
+                <password>didtjdvudrk512</password>
+                <property>
+                    <name>DriverType</name>
+                    <type>java.lang.String</type>
+                    <value>thin</value>
+                </property>
+                <connection-pool>
+                    <pooling>
+                        <min>5</min>
+                        <max>50</max>
+                        <step>5</step>
+                        <period>3600000</period>
+                    </pooling>
+                    <wait-free-connection>
+                        <enable-wait>true</enable-wait>
+                        <wait-time>30000</wait-time>
+                    </wait-free-connection>
+                    <check-query>select 1 from dual</check-query>
+                    <check-query-period>30000</check-query-period>
+                </connection-pool>
+                <auto-commit>true</auto-commit>
+                <stmt-query-timeout>300000</stmt-query-timeout>
+            </database>
+        </data-source>
+    </resource>
+
+    <application>
+        <name>eva</name>
+        <path>/usr/tmax/app/eva_4th</path>
+        <deployment-type>COMPONENT</deployment-type>
+        <web-component>
+            <context-root>/</context-root>
+        </web-component>
+        <deployment-target>
+            <target>
+                <engine-container-name>necte_container1</engine-container-name>
+            </target>
+        </deployment-target>
+    </application>
+    <application>
+        <name>evatest</name>
+        <path>/usr/tmax/app/eva</path>
+        <deployment-type>COMPONENT</deployment-type>
+        <web-component>
+            <context-root>/</context-root>
+        </web-component>
+        <deployment-target>
+            <target>
+                <engine-container-name>necte_container2</engine-container-name>
+            </target>
+        </deployment-target>
+    </application>
+
+<!--
+    <application>
+        <name>uce</name>
+        <path>/usr/tmax/app/daehak</path>
+        <deployment-type>COMPONENT</deployment-type>
+        <web-component>
+            <context-root>/</context-root>
+        </web-component>
+        <deployment-target>
+            <target>
+                <engine-container-name>necte_container3</engine-container-name>
+            </target>
+        </deployment-target>
+    </application>
+
+    <application>
+        <name>eva_3rd</name>
+        <path>/usr/tmax/app/eva</path>
+        <deployment-type>COMPONENT</deployment-type>
+        <web-component>
+            <context-root>/</context-root>
+        </web-component>
+        <deployment-target>
+            <target>
+                <engine-container-name>necte_container4</engine-container-name>
+            </target>
+        </deployment-target>
+    </application>
+-->
+
+</jeus-system>

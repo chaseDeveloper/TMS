@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+       xsi:schemaLocation="
+       		http://mybatis.org/schema/mybatis-spring 
+       		http://mybatis.org/schema/mybatis-spring.xsd
+			http://www.springframework.org/schema/beans 
+			https://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+			http://www.springframework.org/schema/context 
+			https://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/mvc 
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!--
+		- The controllers are autodetected POJOs labeled with the @Controller
+		annotation.
+	-->
+
+	<context:component-scan base-package="common">
+	</context:component-scan>
+
+	
+	<context:component-scan base-package="tms">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	
+	
+		
+ 
+	<mvc:interceptors>
+	
+		<mvc:interceptor>
+			<mvc:mapping path="/**/*.do"/>						
+			<mvc:exclude-mapping path="/main/*.do"/>
+			
+			<bean class="tms.main.interceptor.LoginInterceptor" />
+		</mvc:interceptor>
+		
+	</mvc:interceptors>
+ 
+	
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+    	<property name="basename" value="/WEB-INF/messages/messages" /> <!-- messages.properties 파일의 위치 -->
+    	<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+	
+	<bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="5242880000" />
+        <property name="maxInMemorySize" value="110000000" />
+    </bean>
+	
+	
+	<!-- dataSource 설정 -->
+	<!-- <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" 
+			p:driverClassName="${db.driver}" 
+			p:url="${db.url}" 
+			p:username="${db.username}"
+			p:password="${db.password}"
+			p:defaultAutoCommit="false"
+			p:initialSize="${db.initsize}"
+			p:maxTotal="${db.maxactive}"
+			p:maxIdle="${db.maxidle}"
+			p:testOnBorrow="true"
+			p:validationQuery="select 1 from dual" />
+			 -->
+	
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+	    <property name="driverClassName" value="${db.driver}"/>
+	    <property name="jdbcUrl" value="${db.url}"/>
+	    <property name="username" value="${db.username}"/>
+	    <property name="password" value="${db.password}"/>
+		<property name="autoCommit" value="false"/>
+	    <property name="maximumPoolSize" value="${db.initsize}"/>
+	    <property name="connectionTimeout" value="10000"/>
+	    <property name="maxLifetime" value="1800000"/>
+	    <property name="keepaliveTime" value="600000"/>
+	</bean>
+	 
+	<!-- <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+	    <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+	    <property name="jdbcUrl" value="jdbc:oracle:thin:@121.191.92.20:34444:orcl"/>
+	    <property name="username" value="EVA6TH"/>
+	    <property name="password" value="didtjdvudrk512"/>
+		<property name="autoCommit" value="false"/>
+	    <property name="maximumPoolSize" value="5"/>
+	    <property name="connectionTimeout" value="10000"/>
+	    <property name="maxLifetime" value="1800000"/>
+	    <property name="keepaliveTime" value="600000"/>
+	</bean>	 --> 
+	 
+	<!-- 실서버 -->
+	<!-- <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
+	    <property name="driverClassName" value="com.tmax.tibero.jdbc.TbDriver"/>
+	    <property name="jdbcUrl" value="jdbc:tibero:thin:@100.100.6.11:8629:NECTE"/>
+	    <property name="username" value="EVA6TH"/>
+	    <property name="password" value="tibero"/>
+		<property name="autoCommit" value="false"/>
+	    <property name="maximumPoolSize" value="5"/>
+	    <property name="connectionTimeout" value="10000"/>
+	    <property name="maxLifetime" value="1800000"/>
+	    <property name="keepaliveTime" value="600000"/>
+	</bean> -->
+		
+			
+	<!-- DB 설정파일 패스워드 암호화 -->		
+	<bean id="environmentVariablesConfiguration" class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
+        <property name="algorithm" value="PBEWithMD5AndDES" />
+        <property name="password" value="TBM_PASSWORD" />
+    </bean>
+    
+    <bean id="configurationEncryptor" class="org.jasypt.encryption.pbe.StandardPBEStringEncryptor">
+        <property name="config" ref="environmentVariablesConfiguration"></property>
+    </bean>
+
+    <bean id="propertyConfigurer" class="org.jasypt.spring4.properties.EncryptablePropertyPlaceholderConfigurer">
+        <constructor-arg ref="configurationEncryptor" />
+            <property name="locations">
+                <list>
+                    <value>/WEB-INF/config/db.properties</value>
+                </list>
+            </property>
+    </bean>
+	
+	<!-- 메일 설정 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+	  <property name="javaMailProperties">
+           <map>	        	
+	       	<entry key="kediMailAuth" value="${mail.smtp.auth}"/> 
+	       	<entry key="kediMailTls" value="${mail.smtp.starttls.enable}"/>
+	       	<entry key="kediMailPort" value="${mail.smtp.port}"/>
+	       	<entry key="kediMailHost" value="${mail.host}"/>
+	       	<entry key="kediMailId" value="${mail.id}"/>
+	       	<entry key="kediMailPasswd" value="${mail.password}"/>	
+	       	<entry key="kediMailVendor" value="${mail.vendor}"/>
+	       	<entry key="kediMailFromEmail" value="${mail.fromemail}"/>     
+	       </map>
+       </property>
+    </bean>  
+	
+	
+	<!-- TX CONFIGURATION -->
+	
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource" />
+		
+	
+
+	<!-- 마이바티스 설정 // -->
+
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">	
+		<property name="dataSource" ref="dataSource" />	
+		<property name="mapperLocations" value="classpath:tms/**/maps/*.xml" />	
+		<property name="configLocation" value="/WEB-INF/config/mybatis-config.xml" />	
+	</bean>
+ 
+	<mybatis-spring:scan base-package="tms" />
+
+	
+	
+	<mvc:annotation-driven  />
+</beans>
+

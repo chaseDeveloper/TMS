@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+
+<mapper namespace="tms.pool.maps.PoolMapper">
+	
+	<resultMap id="sign_clob" type="Map">
+   	 	<result property="SIGN_1" column="SIGN_1" jdbcType="CLOB" javaType="java.lang.String" />
+	</resultMap>
+		
+	<select id="getPoolInfo" parameterType="String" resultType="map">
+		SELECT 
+			A.DI,
+		    A.ROLE,
+		    A.USR_ID,
+		    A.PRIV_YN,
+		    A.PRIV_DTTM,
+		    A.QUAN_YN,
+		    A.QUAL_YN,
+		    A.DISQ_YN_1,
+		    A.DISQ_UNIV_CD_1,
+		    A.DISQ_YN_2,
+		    A.DISQ_UNIV_CD_2,
+		    A.NAME,
+		    A.GENDER,
+		    A.TEL_HP,
+		    A.TEL_HOME,
+		    A.BIRTHDAY,
+		    A.ADDR_HOME_ZIPCODE,
+		    A.ADDR_HOME,
+		    A.ADDR_HOME_DETAIL,
+		    A.UNIV_CD,
+		    (SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = A.UNIV_CD) AS UNIV_CD_NM,
+		    A.JOB_NM,
+		    A.POSITION,
+		    A.DEPT,
+		    A.EMAIL,
+		    A.ADDR_JOB_ZIPCODE,
+		    A.ADDR_JOB,
+		    A.ADDR_JOB_DETAIL,
+		    A.TEL_JOB,
+		    A.RESUME_1,
+		    A.RESUME_2,
+		    A.EDU_DIV,
+		    A.JOB_CD,
+		    A.UNIV_DIV,
+		    CASE
+		        WHEN A.UNIV_DIV IS NOT NULL THEN (SELECT DISTINCT UNIV_TYPE_NM FROM E6_EDNST_ADDR_M WHERE UNIV_TYPE_CD = A.UNIV_DIV)
+		        ELSE NULL
+		    END AS UNIV_DIV_NM,
+		    A.CTPV_CD,
+		    CASE
+		        WHEN A.CTPV_CD IS NOT NULL THEN (SELECT DISTINCT CTPV_NM FROM E6_EDNST_ADDR_M WHERE CTPV_CD = A.CTPV_CD)
+		        ELSE NULL
+		    END AS CTPV_CD_NM,
+		    A.DEL_YN,
+		    A.INPT_ID,
+		    A.INPT_DT,
+		    A.LAST_CHNRG_ID,
+		    A.LAST_CHG_DT,
+		    A.IP,
+		    A.FILE_ID,
+		    (SELECT ORG_FILE_NAME FROM EVA_FILE WHERE FILE_ID = A.FILE_ID AND FILE_SEQ = '0001') FILE_NM
+		FROM
+		    EVA_POOL_M A
+		WHERE
+		    A.DI = #{di}	    	
+	</select>
+	
+	
+	<!-- 진단위원 후보자 학력 목록 조회 -->
+	<select id="selectPoolDegreeList" parameterType="map" resultType="map" flushCache="false">
+		SELECT 
+		    epd.DI,
+		    epd.USR_ID,
+		    epd.SEQ,
+		    epd.EDU_YM,
+		    epd.UNIV_CD,
+		    ec.CODE_NM AS UNIV_NM, -- eva_code 테이블에서 가져온 CODE_NM
+		    epd.LOC_CD,
+		    epd.LOC_CD_NM,
+		    epd.DEG_CD,
+		    epd.DEG_CD_NM,
+		    epd.MAJOR,
+		    epd.DEL_YN
+		FROM 
+		    EVA_POOL_DEGREE epd
+		LEFT JOIN 
+		    eva_code ec ON epd.UNIV_CD = ec.org_cd AND ec.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		WHERE 
+		    epd.USR_ID = #{usrId}
+		    AND (epd.DEL_YN IS NULL OR epd.DEL_YN != 'Y')
+		ORDER BY 
+		    epd.DEG_CD
+	</select>
+	
+	<!-- 진단위원 후보자 재직경력 목록 조회 -->
+	<select id="selectPoolFulltimeTeacherList" parameterType="map" resultType="map">
+		SELECT 
+		    eft.DI,
+		    eft.USR_ID,
+		    eft.SEQ,
+		    eft.JOB_ST_YM,
+		    eft.JOB_ED_YM,
+		    eft.UNIV_CD,
+		    ec.CODE_NM AS UNIV_NM, -- 대학명은 eva_code 테이블에서 가져온다
+		    eft.DEPT,
+		    eft.DEL_YN
+		FROM 
+		    EVA_POOL_FULLTIME_TEACHER eft
+		LEFT JOIN 
+		    eva_code ec ON eft.UNIV_CD = ec.org_cd AND ec.group_cd = 'LAST_DEG_ACQS_SCHL_CD' -- 조건에 맞는 테이블 조인
+		WHERE 
+		    eft.USR_ID = #{usrId}
+		    AND (eft.DEL_YN IS NULL OR eft.DEL_YN != 'Y')
+		ORDER BY 
+		    eft.JOB_ST_YM, 
+		    eft.JOB_ED_YM, 
+		    eft.SEQ
+	</select>
+	
+	<!-- 진단위원 후보자 진단(평가)위원 또는 진단(평가)준비위원 할동경험 목록 조히 -->
+	<select id="selectPoolEvaExpList" parameterType="map" resultType="map">
+		SELECT DI,USR_ID, SEQ, TYPE_DIV, PART_YEAR, EVA_NM, ORG, ROLE_CD, ROLE_CD_NM, DEL_YN, INPT_ID
+		  FROM EVA_POOL_EVA_EXP
+		 WHERE USR_ID = #{usrId}
+		   AND (DEL_YN IS NULL OR DEL_YN != 'Y')
+		  AND TYPE_DIV = #{typeDiv}		
+		 ORDER BY PART_YEAR, SEQ
+	</select>
+	
+	<update id="updatePoolInfo" parameterType="map">
+		UPDATE EVA_POOL_M
+	 	SET	
+	 	USR_ID = #{usrId}
+	 	, JOB_CD	= #{jobCd}	 	
+	 	, UNIV_DIV = #{univDiv}
+	 	, JOB_NM = #{jobNm}	 
+	 	, UNIV_CD = #{univCd}	 		
+		, DEPT = #{dept}
+		, POSITION = #{position}
+		, EMAIL = #{email}
+		, TEL_HP = #{telhp}
+		, TEL_HOME = #{telhome}
+	 	, ADDR_HOME_ZIPCODE = #{AddrHomeZipcode}
+	 	, ADDR_HOME	 = #{AddrHome}	
+	 	, ADDR_HOME_DETAIL = #{AddrHomeDetail}	 	
+		, RESUME_1 = #{resume1}
+		, RESUME_2 = #{resume2}	
+		, CTPV_CD = #{ctpvCd}				
+		, LAST_CHNRG_ID = #{usrId}		
+		, LAST_CHG_DT = sysdate
+		, FILE_ID = #{lastDegCertFileId}
+	 	WHERE 
+	 		DI 	= #{di}
+	</update>
+	
+	<!-- 진단위원 후보자 학력 등록 -->
+	<insert id="insertPoolDegreeInfo" parameterType="map" flushCache="true">
+		<selectKey keyProperty="SEQ" resultType="int" order="BEFORE">
+				SELECT NVL(MAX(SEQ), 0) + 1 SEQ
+				  FROM EVA_POOL_DEGREE
+				 WHERE USR_ID = #{usrId}			 
+			</selectKey>
+		INSERT INTO EVA_POOL_DEGREE (
+			DI,USR_ID, SEQ,
+			DEG_CD, DEG_CD_NM, UNIV_CD, UNIV_NM, EDU_YM, MAJOR,
+			DEL_YN, INPT_ID, INPT_DT
+		) VALUES (
+			#{di},#{usrId}, #{SEQ},
+			#{degCd}, #{degCdNm}, #{degUnivCd}, #{degUnivNm}, #{degEduYm}, #{degMajor},
+			'N', #{usrId}, SYSDATE
+		)
+	</insert>
+	<!-- 진단위원 후보자 학력 삭제 -->
+	<delete id="deletePoolDegreeList" parameterType="map" flushCache="true">
+		DELETE FROM EVA_POOL_DEGREE
+		 WHERE USR_ID = #{orgEmail}		   
+	</delete>
+	
+	<!-- 진단위원 후보자 재직경력 등록 -->
+	<insert id="insertPoolFulltimeTeacherInfo" parameterType="map" flushCache="true">
+		<selectKey keyProperty="SEQ" resultType="int" order="BEFORE">
+			SELECT NVL(MAX(SEQ), 0) + 1 SEQ
+			  FROM EVA_POOL_FULLTIME_TEACHER
+			 WHERE USR_ID = #{usrId}			 
+		</selectKey>
+		INSERT INTO EVA_POOL_FULLTIME_TEACHER (
+			DI,USR_ID, SEQ,
+			JOB_ST_YM, JOB_ED_YM, UNIV_CD, UNIV_NM, DEPT,
+			DEL_YN, INPT_ID, INPT_DT
+		) VALUES (
+			#{di},#{usrId}, #{SEQ},
+			#{fttJobStYm}, #{fttjobEdYm}, #{fttUnivCd}, #{fttUnivNm}, #{fttDept},
+			'N', #{usrId}, SYSDATE
+		)
+	</insert>
+	
+	<!-- 진단위원 후보자 재직경력 삭제 -->
+	<delete id="deletePoolFulltimeTeacherList" parameterType="map" flushCache="true">
+		DELETE FROM EVA_POOL_FULLTIME_TEACHER
+		 WHERE USR_ID = #{orgEmail}		    
+	</delete>
+	
+	<!-- 진단위원 후보자 진단위원 활동경험 등록 -->
+	<insert id="insertPoolEvaExpInfo" parameterType="map" flushCache="true">
+		<selectKey keyProperty="SEQ" resultType="int" order="BEFORE">
+				SELECT NVL(MAX(SEQ), 0) + 1 SEQ
+			  		FROM EVA_POOL_EVA_EXP
+					WHERE USR_ID = #{usrId}
+					  AND TYPE_DIV = #{typeDiv}	
+		</selectKey>
+		INSERT INTO EVA_POOL_EVA_EXP (
+			DI,USR_ID, SEQ, TYPE_DIV,
+			PART_YEAR, EVA_NM, ORG, ROLE_CD, ROLE_CD_NM,
+			DEL_YN, INPT_ID, INPT_DT
+		) VALUES (
+			#{di},#{usrId}, #{SEQ}, #{typeDiv},
+			#{partYear}, #{evaNm}, #{org}, #{roleCd}, #{roleCdNm},
+			'N', #{usrId}, SYSDATE
+		)
+	</insert>
+	
+	<!-- 진단위원 후보자 진단위원 활동경험 삭제 -->
+	<delete id="deletePoolEvaExpList" parameterType="map" flushCache="true">
+		DELETE FROM EVA_POOL_EVA_EXP
+		 WHERE USR_ID = #{orgEmail}		   
+	</delete>	
+	
+	<select id="isExistEmail" parameterType="map" resultType="boolean" useCache="false" flushCache="false">
+		SELECT
+			COUNT(*)
+		FROM
+			EVA_POOL_M 
+		WHERE
+			USR_ID = #{email}		
+	</select>
+	
+	<select id="isChangeEmail" parameterType="map" resultType="boolean" useCache="false" flushCache="false">
+		SELECT
+			COUNT(*)
+		FROM
+			EVA_POOL_M 
+		WHERE
+			USR_ID = #{email}
+		AND	USR_ID != #{orgEmail}		
+	</select>
+	
+	<select id="selectSchlList" parameterType="map" resultType="map">		
+		SELECT 
+			ROW_NUMBER() OVER (ORDER BY UNIV_NM) R_NUM
+			 , UNIV_TYPE_CD
+			 , UNIV_TYPE_NM
+			 , CTPV_CD
+			 , CTPV_NM
+		     , UNIV_CD              
+             , UNIV_NM          
+        FROM 
+        	E6_EDNST_ADDR_M
+		<where>            
+			AND (UNIV_NM LIKE '%' || #{searchText} || '%')
+			AND APLCN_YR = (SELECT MAX(APLCN_YR) FROM E6_EDNST_ADDR_M)          	  							
+		</where>
+		ORDER BY UNIV_NM	
+	</select>
+	<!-- 
+	<select id="selectSchlList2" parameterType="map" resultType="map">		
+		SELECT /* CO01001.selectAcqsSchlList*/
+			ROW_NUMBER() OVER (ORDER BY SORT_SEQ) R_NUM
+		     , CODE                /* 코드값 */
+             , CODE_NM             /* 코드명 */
+             , SPARE_1				   /* 추가컬럼   */
+        FROM 
+        	EVA_CODE 
+		<where>
+            AND GROUP_CD = 'LAST_DEG_ACQS_SCHL_CD'
+            AND USE_YN = 'Y'
+            AND DEL_YN = 'N'
+            AND GROUP_YN = 'N'
+			<choose>
+				<when test="spare1 == '국내'">
+                 AND SPARE_1 = '1'                 		
+                 AND (
+          				(CODE_NM LIKE '%' || #{searchText} || '%')
+          	  		  )
+				</when>	
+				<otherwise>
+                 AND SPARE_1 = '2'  
+                 AND (
+          				(CODE_NM LIKE '%' || #{searchText} || '%')
+          	  		  )				
+				</otherwise>			
+			</choose>			
+		</where>
+		ORDER BY CODE_NM
+	</select> -->
+	
+	<select id="selectSchlList2" parameterType="map" resultType="map">		
+		SELECT 
+			ROW_NUMBER() OVER (ORDER BY CODE) R_NUM
+		     , ORG_CD                /* 코드값 */
+             , CODE_NM             /* 코드명 */
+             , ADD_CMT				   /* 추가컬럼   */
+        FROM 
+        	EVA_CODE 
+		<where>
+            AND GROUP_CD = 'LAST_DEG_ACQS_SCHL_CD'
+            AND USE_YN = 'Y'          
+			<choose>
+				<when test="accCmt == '국내'">
+                 AND ADD_CMT = '국내'                 		
+                 AND (
+          				(UPPER(CODE_NM) LIKE '%' || UPPER(#{searchText}) || '%')
+          	  		  )
+				</when>	
+				<otherwise>
+                 AND ADD_CMT = '국외'  
+                 AND (
+          				(UPPER(CODE_NM) LIKE '%' || UPPER(#{searchText}) || '%')
+          	  		  )				
+				</otherwise>			
+			</choose>			
+		</where>
+		ORDER BY CODE_NM
+	</select> 
+	
+	
+	<update id="updatePoolApplInfo" parameterType="map">
+		UPDATE EVA_POOL_APPL
+	 	SET	
+	 	USR_ID = #{usrId}	 
+	 	WHERE 
+	 		DI 	= #{di}
+	</update>
+	
+	<update id="updatePoolDisqUnivInfo" parameterType="map">
+		UPDATE EVA_POOL_DISQ_UNIV
+	 	SET	
+	 	USR_ID = #{usrId}	 
+	 	WHERE 
+	 		DI 	= #{di}
+	</update>	
+	
+		
+</mapper>

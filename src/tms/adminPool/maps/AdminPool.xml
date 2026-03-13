@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.adminPool.maps.AdminPoolMapper">
+	
+	
+	<select id="getAdminPoolList" parameterType="map" resultType="map" flushCache="false">		
+		SELECT
+		    M.CI,
+		    M.DI,
+		    CASE WHEN M.DI IS NULL THEN 'N' ELSE 'Y' END AS DI_STATUS,
+		    M.ROLE,
+		    M.USR_ID,
+		    M.PRIV_YN,
+		    TO_CHAR(M.PRIV_DTTM, 'YYYY-MM-DD HH24:MI') AS PRIV_DTTM,
+		    M.QUAN_YN,
+		    M.QUAL_YN,
+		    M.DISQ_YN_1,
+		    M.DISQ_UNIV_CD_1,
+		    M.DISQ_YN_2,
+		    M.DISQ_UNIV_CD_2,
+		    M.NAME,
+		    M.GENDER,
+		    M.TEL_HP,
+		    M.TEL_HOME,
+		    M.BIRTHDAY,
+		    M.ADDR_HOME_ZIPCODE,
+		    M.ADDR_HOME,
+		    M.ADDR_HOME_DETAIL,
+		    M.UNIV_CD,
+		    (SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = M.UNIV_CD) AS UNIV_NM,
+		    M.POSITION,
+		    M.DEPT,
+		    M.EMAIL,
+		    M.ADDR_JOB_ZIPCODE,
+		    M.ADDR_JOB,
+		    M.ADDR_JOB_DETAIL,
+		    M.TEL_JOB,
+		    M.RESUME_1,
+		    M.RESUME_2,
+		    M.UNIV_DIV,
+		    CASE
+		        WHEN M.UNIV_DIV IS NOT NULL THEN (SELECT DISTINCT UNIV_TYPE_NM FROM E6_EDNST_ADDR_M WHERE UNIV_TYPE_CD = M.UNIV_DIV)
+		        ELSE NULL
+		    END AS UNIV_DIV_NM,
+		    CASE WHEN TO_CHAR(M.JOB_CD) = '1' THEN '교수'
+		         WHEN TO_CHAR(M.JOB_CD) = '2' THEN '교직원'
+		         ELSE '기타'
+		    END AS JOB_TITLE,
+		    M.UNIV_DIV,
+		    M.CTPV_CD,
+		    M.DEL_YN,  
+		    EC1.CODE_NM AS A_UNIV,
+		    A.MAJOR AS A_MAJOR,
+		    EC2.CODE_NM AS B_UNIV,
+		    B.MAJOR AS B_MAJOR,
+		    EC3.CODE_NM AS C_UNIV,
+		    C.MAJOR AS C_MAJOR,
+		    M.INPT_ID,
+		    M.INPT_DT,
+		    M.LAST_CHNRG_ID,
+		    M.LAST_CHG_DT,
+		    M.FILE_ID,
+		    (SELECT ORG_FILE_NAME FROM EVA_FILE WHERE FILE_ID = M.FILE_ID AND FILE_SEQ = '0001') FILE_NM
+		FROM
+		    EVA_POOL_M M
+		LEFT JOIN EVA_POOL_DEGREE A ON M.USR_ID = A.USR_ID AND A.SEQ = 1
+		LEFT JOIN EVA_POOL_DEGREE B ON M.USR_ID = B.USR_ID AND B.SEQ = 2
+		LEFT JOIN EVA_POOL_DEGREE C ON M.USR_ID = C.USR_ID AND C.SEQ = 3
+		LEFT JOIN eva_code EC1 ON A.UNIV_CD = EC1.org_cd AND EC1.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		LEFT JOIN eva_code EC2 ON B.UNIV_CD = EC2.org_cd AND EC2.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		LEFT JOIN eva_code EC3 ON C.UNIV_CD = EC3.org_cd AND EC3.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		WHERE M.USR_ID IS NOT NULL
+		ORDER BY M.NAME, M.USR_ID
+	</select>	
+	
+	<select id="getAdminPoolInfo" parameterType="String" resultType="map">
+		SELECT 
+			A.DI,
+		    A.ROLE,
+		    A.USR_ID,
+		    A.PRIV_YN,
+		    <!-- A.PRIV_DTTM, -->
+		    A.QUAN_YN,
+		    A.QUAL_YN,
+		    A.DISQ_YN_1,
+		    A.DISQ_UNIV_CD_1,
+		    A.DISQ_YN_2,
+		    A.DISQ_UNIV_CD_2,
+		    A.NAME,
+		    A.GENDER,
+		    A.TEL_HP,
+		    A.TEL_HOME,
+		    A.BIRTHDAY,
+		    A.ADDR_HOME_ZIPCODE,
+		    A.ADDR_HOME,
+		    A.ADDR_HOME_DETAIL,
+		    A.UNIV_CD,
+		    (SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = A.UNIV_CD) AS UNIV_CD_NM,
+		    A.JOB_NM,
+		    A.POSITION,
+		    A.DEPT,
+		    A.EMAIL,
+		    A.ADDR_JOB_ZIPCODE,
+		    A.ADDR_JOB,
+		    A.ADDR_JOB_DETAIL,
+		    A.TEL_JOB,
+		    A.RESUME_1,
+		    A.RESUME_2,
+		    A.EDU_DIV,
+		    A.JOB_CD,
+		    A.UNIV_DIV,
+		    CASE
+		        WHEN A.UNIV_DIV IS NOT NULL THEN (SELECT DISTINCT UNIV_TYPE_NM FROM E6_EDNST_ADDR_M WHERE UNIV_TYPE_CD = A.UNIV_DIV)
+		        ELSE NULL
+		    END AS UNIV_DIV_NM,
+		    A.CTPV_CD,
+		    CASE
+		        WHEN A.CTPV_CD IS NOT NULL THEN (SELECT DISTINCT CTPV_NM FROM E6_EDNST_ADDR_M WHERE CTPV_CD = A.CTPV_CD)
+		        ELSE NULL
+		    END AS CTPV_CD_NM,
+		    A.DEL_YN,
+		    A.INPT_ID,
+		    A.INPT_DT,
+		    A.LAST_CHNRG_ID,
+		    A.LAST_CHG_DT
+		FROM
+		    EVA_POOL_M A
+		WHERE
+		    A.USR_ID = #{usrId}		    	
+	</select>
+	
+	<!-- 진단위원 후보자 학력 목록 조회 -->
+	<select id="selectPoolDegreeList" parameterType="map" resultType="map" flushCache="false">
+		SELECT 
+		    epd.DI,
+		    epd.USR_ID,
+		    epd.SEQ,
+		    epd.EDU_YM,
+		    epd.UNIV_CD,
+		    ec.CODE_NM AS UNIV_NM, -- eva_code 테이블에서 가져온 CODE_NM
+		    epd.LOC_CD,
+		    epd.LOC_CD_NM,
+		    epd.DEG_CD,
+		    epd.DEG_CD_NM,
+		    epd.MAJOR,
+		    epd.DEL_YN
+		FROM 
+		    EVA_POOL_DEGREE epd
+		LEFT JOIN 
+		    eva_code ec ON epd.UNIV_CD = ec.org_cd AND ec.group_cd = 'LAST_DEG_ACQS_SCHL_CD'
+		WHERE 
+		    epd.USR_ID = #{usrId}
+		    AND (epd.DEL_YN IS NULL OR epd.DEL_YN != 'Y')
+		ORDER BY 
+		    epd.DEG_CD
+	</select>
+	
+	<!-- 진단위원 후보자 재직경력 목록 조회 -->
+	<select id="selectPoolFulltimeTeacherList" parameterType="map" resultType="map">
+		SELECT 
+		    eft.DI,
+		    eft.USR_ID,
+		    eft.SEQ,
+		    eft.JOB_ST_YM,
+		    eft.JOB_ED_YM,
+		    eft.UNIV_CD,
+		    ec.CODE_NM AS UNIV_NM, -- 대학명은 eva_code 테이블에서 가져온다
+		    eft.DEPT,
+		    eft.DEL_YN
+		FROM 
+		    EVA_POOL_FULLTIME_TEACHER eft
+		LEFT JOIN 
+		    eva_code ec ON eft.UNIV_CD = ec.org_cd AND ec.group_cd = 'LAST_DEG_ACQS_SCHL_CD' -- 조건에 맞는 테이블 조인
+		WHERE 
+		    eft.USR_ID = #{usrId}
+		    AND (eft.DEL_YN IS NULL OR eft.DEL_YN != 'Y')
+		ORDER BY 
+		    eft.JOB_ST_YM, 
+		    eft.JOB_ED_YM, 
+		    eft.SEQ
+	</select>
+	
+	<!-- 진단위원 후보자 진단(평가)위원 또는 진단(평가)준비위원 할동경험 목록 조히 -->
+	<select id="selectPoolEvaExpList" parameterType="map" resultType="map">
+		SELECT DI,USR_ID, SEQ, TYPE_DIV, PART_YEAR, EVA_NM, ORG, ROLE_CD, ROLE_CD_NM, DEL_YN, INPT_ID
+		  FROM EVA_POOL_EVA_EXP
+		 WHERE USR_ID = #{usrId}
+		   AND (DEL_YN IS NULL OR DEL_YN != 'Y')
+		  AND TYPE_DIV = #{typeDiv}		
+		 ORDER BY PART_YEAR, SEQ
+	</select>
+	
+	<!-- 기피제척 대학 목록 조회 -->
+	<select id="selectPoolDisqUnivList" parameterType="map" resultType="map">
+		SELECT A.PERIOD_DIV_CD
+		     , A.EVA_YEAR
+		     , A.POOL_CD
+		     , A.USR_ID
+		     , A.DISQ_DIV
+		     , A.SEQ
+		     , A.DISQ_UNIV_CD
+		     , B.UNIV_NM DISQ_UNIV_NM
+		     , A.INPT_ID
+		     , A.INPT_DT
+		  FROM EVA_POOL_DISQ_UNIV A
+		     , (SELECT DISTINCT UNIV_CD, UNIV_NM FROM E6_EDNST_ADDR_M) B
+		 WHERE A.DISQ_UNIV_CD = B.UNIV_CD
+		   AND A.PERIOD_DIV_CD = #{periodDivCd}
+		   AND A.EVA_YEAR = #{evaYear}
+		   AND A.POOL_CD = #{poolCd}
+		   AND A.USR_ID = #{usrId}
+		   AND A.DISQ_DIV = #{disq_div}
+		 ORDER BY A.SEQ
+	</select>
+	
+	<!-- 개인정보 동의 15일 리스트 조회 -->
+	<select id="getConsentRequired" parameterType="map" resultType="map" flushCache="false">
+	    SELECT
+			*
+	    FROM
+	        EVA_POOL_M M
+	    WHERE
+	        M.PRIV_YN = 'Y'                              -- 개인정보 동의한 사용자만
+	        AND M.DEL_YN = 'N'                           -- 삭제 대상이 아닌 사용자만
+	        AND (M.PRIV_DTTM + INTERVAL '2' YEAR) &lt;= SYSDATE + INTERVAL '15' DAY -- 15일 이내 만료 예정
+	        AND (M.PRIV_DTTM + INTERVAL '2' YEAR) &gt; SYSDATE -- 이미 만료되지 않은 사용자
+	    ORDER BY
+	        (M.PRIV_DTTM + INTERVAL '2' YEAR) ASC        -- 만료일 기준 정렬
+	</select>
+	
+	<!-- 개인정보 2년 지난 유저 삭제 -->
+	<delete id="deleteExpiredRows" parameterType="map">
+	  DELETE FROM EVA_POOL_M
+	  WHERE PRIV_YN = 'Y'
+	  	AND DEL_YN = 'N'
+	    AND DI IS NOT NULL
+	    AND ADD_MONTHS(PRIV_DTTM, 24) &lt; TRUNC(SYSDATE)
+	</delete>
+	
+	<!-- 유저 검색 -->
+	<select id="selectEncryptedRows" resultType="map">
+	    SELECT 
+	        NAME,
+	        USR_ID
+	      FROM EVA_POOL_M
+	     WHERE PRIV_YN = 'Y'
+	       AND DEL_YN = 'N'
+	       AND DI IS NOT NULL
+	       AND ADD_MONTHS(PRIV_DTTM, 24) &lt; TRUNC(SYSDATE)
+	</select>
+
+	<!-- 개인정보 2년 지난 유저 로그 -->
+	<insert id="insertDeletedMember" parameterType="map">
+	    INSERT INTO EVA_POOL_M_DEL (DEL_SEQ, NAME, USR_ID, RMRK, DEL_DT)
+	    VALUES (EVA_POOL_M_DEL_SEQ.NEXTVAL, #{NAME}, #{USR_ID}, '개인정보 파기', SYSDATE)
+	</insert>
+	
+	<!-- 다른테이블에 있는 데이터도 삭제 -->
+	<delete id="deletePoolApplByUsrId" parameterType="map">
+        DELETE FROM EVA6TH.EVA_POOL_APPL
+         WHERE USR_ID = #{usrId}
+    </delete>
+
+    <!-- EVA_POOL_DISQ_UNIV 테이블에서 삭제 -->
+    <delete id="deletePoolDisqUnivByUsrId" parameterType="map">
+        DELETE FROM EVA6TH.EVA_POOL_DISQ_UNIV
+         WHERE USR_ID = #{usrId}
+    </delete>
+
+    <!-- EVA_POOL_EVA_EXP 테이블에서 삭제 -->
+    <delete id="deletePoolEvaExpByUsrId" parameterType="map">
+        DELETE FROM EVA6TH.EVA_POOL_EVA_EXP
+         WHERE USR_ID = #{usrId}
+    </delete>
+
+    <!-- EVA_POOL_FULLTIME_TEACHER 테이블에서 삭제 -->
+    <delete id="deletePoolFulltimeTeacherByUsrId" parameterType="map">
+        DELETE FROM EVA6TH.EVA_POOL_FULLTIME_TEACHER
+         WHERE USR_ID = #{usrId}
+    </delete>
+
+    <!-- EVA_POOL_DEGREE 테이블에서 삭제 -->
+    <delete id="deletePoolDegreeByUsrId" parameterType="map">
+        DELETE FROM EVA6TH.EVA_POOL_DEGREE
+         WHERE USR_ID = #{usrId}
+    </delete>	
+</mapper>

@@ -1,0 +1,749 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.cmmn.maps.CmmnMapper">
+	
+	<resultMap id="hisMap" type="java.util.HashMap">	
+		<result property="PARAM" column="PARAM" javaType="java.lang.String" />
+		<result property="RESULT" column="RESULT" javaType="java.lang.String" />		
+	</resultMap>
+
+
+	
+	<insert id="insertFile" parameterType="map">	
+		<selectKey keyProperty="fileId" resultType="String" order="BEFORE">
+			SELECT 'FILE' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(FILE_ID, 5))), 0) + 1, 10, '0') fileId FROM EVA_FILE
+		</selectKey>
+		Insert All 
+	    <foreach collection="list" item="item" index="index">
+	        Into EVA_FILE (FILE_ID, FILE_SEQ, FILE_PATH, FILE_NAME, ORG_FILE_NAME, FILE_SIZE, INPT_DT, INPT_ID, INPT_USR_PERM) 
+	        values (#{fileId}, #{item.fileSeq}, #{item.filePath}, #{fileId} || '_' || #{item.fileName}, #{item.orgFileName}, #{item.fileSize}, sysdate, #{item.regstUsrId}, #{item.regstUsrPerm})
+	    </foreach>
+	    select * from dual
+    </insert>
+    
+    <insert id="insertFileExistFileId" parameterType="map">	
+
+        INSERT INTO EVA_FILE (FILE_ID, FILE_SEQ, FILE_PATH, FILE_NAME, ORG_FILE_NAME, FILE_SIZE, INPT_DT, INPT_ID, INPT_USR_PERM) 
+        values (#{fileId}, #{fileSeq}, #{filePath}, #{fileId} || '_' || #{fileName}, #{orgFileName}, #{fileSize}, sysdate, #{regstUsrId}, #{regstUsrPerm})
+
+    </insert>
+	
+	<!-- 
+	<insert id="insertFile" parameterType="map">
+        INSERT INTO E6_FILE_INFO (
+        	FILE_ID, FILE_SEQ, BIZ_CD, FILE_PATH,
+        	FILE_NAME, ORG_FILE_NAME, FILE_SIZE, FRST_REGST_DTTM,
+        	DEL_YN, REGST_USR_ID
+        ) VALUES (
+        	#{fileId}, #{fileSeq}, #{bizCd}, #{filePath},
+        	#{fileName}, #{orgFileName}, #{fileSize}, sysdate,
+        	'N', #{regstUsrId}
+        )
+    </insert>
+     -->
+    
+    <select id="getFileInfo" parameterType="map" resultType="map" flushCache="true">
+		SELECT 
+		       FILE_ID
+		     , FILE_SEQ
+			 , FILE_PATH
+			 , FILE_NAME
+			 , ORG_FILE_NAME
+			 , FILE_SIZE
+			 , INPT_ID
+			 , INPT_USR_PERM
+		FROM 
+			EVA_FILE
+		WHERE
+			FILE_ID = #{fileId}
+			AND FILE_SEQ = #{fileSeq}
+			AND DEL_YN = 'N'		 
+	</select>
+	
+	<select id="getFileList" parameterType="String" resultType="map" flushCache="true">
+		SELECT 
+		       FILE_ID
+		     , FILE_SEQ
+			 , FILE_PATH
+			 , FILE_NAME
+			 , ORG_FILE_NAME
+			 , FILE_SIZE
+			 , INPT_ID
+			 , INPT_USR_PERM
+		FROM 
+			EVA_FILE
+		WHERE
+			FILE_ID = #{fileId}
+			AND DEL_YN = 'N'		 
+		ORDER BY FILE_SEQ
+	</select>
+	
+	<delete id="deleteFile" parameterType="map">
+		DELETE FROM EVA_FILE WHERE FILE_ID = #{fileId} AND FILE_SEQ = #{fileSeq}
+    </delete>
+    
+    <update id="updateFileSeq" parameterType="map">	
+		UPDATE EVA_FILE
+		SET
+			FILE_SEQ = #{fileSeq}
+		WHERE
+			FILE_ID = #{fileId}
+			AND FILE_SEQ = #{orginFileSeq}
+    </update>
+    
+    <delete id="deleteGreaterFileSeq" parameterType="map">	
+		DELETE EVA_FILE
+		WHERE
+			FILE_ID = #{fileId}
+			AND FILE_SEQ >= #{fileSeq}
+    </delete>
+
+    <insert id="insertHis" parameterType="map">
+    	<selectKey keyProperty="HIS_NO" resultType="String" order="BEFORE">
+			<!--2025.02.03 EVA_HIS_SEQ 시퀀스로 변경  -->
+			SELECT 'H' || LPAD(EVA_HIS_SEQ.NEXTVAL, 13, '0') AS HIS_NO FROM DUAL
+		</selectKey>
+        INSERT INTO EVA_HIS (
+        	HIS_NO, MENU_NO, MENU_NM, WORK_TYPE, FUNC_NM, UNIV_NM, RMRK, RESULT_TYPE, LINK, PRIVACY_YN, PRIVACY_INFO, INPT_DT, INPT_ID, INPT_NM, INPT_USR_NO, USR_IP, SESSION_ID, URI
+        ) VALUES (
+        	#{HIS_NO}, #{MENU_NO}, #{MENU_NM}, #{WORK_TYPE}, #{FUNC_NM}, #{UNIV_NM}, #{RMRK}, #{RESULT_TYPE}, #{LINK}, #{PRIVACY_YN}, #{PRIVACY_INFO}, sysdate, #{sessUsrId}, #{sessUsrNm}, #{sessUsrNo}, #{usrIp}, #{sessionId}, #{uri}
+        )
+    </insert>
+    
+    <update id="updateHis" parameterType="map">
+    	UPDATE EVA_HIS
+    	SET
+    		RESULT_TYPE = #{RESULT_TYPE}
+    		, RESULT = #{RESULT}
+    		, PARAM = #{PARAM}
+    		, RMRK = #{RMRK}
+    		, INPT_ID = #{usrId}
+    		, INPT_NM = #{usrNm}
+    		, INPT_USR_NO = #{usrNo}
+    		, LAST_CHG_DT = SYSDATE
+    	WHERE
+    		HIS_NO = #{HIS_NO}
+    </update>
+    
+    <select id="getHisInfo" parameterType="String" resultMap="hisMap" flushCache="true">
+		SELECT
+			HIS_NO
+			, MENU_NO
+			, MENU_NM
+			, WORK_TYPE
+			, FUNC_NM
+			, UNIV_NM
+			, RMRK
+			, RESULT_TYPE
+			, LINK
+			, PRIVACY_YN
+			, PRIVACY_INFO
+			, INPT_DT
+			, INPT_ID
+			, INPT_NM
+			, INPT_USR_NO
+			, LAST_CHG_DT
+			, TO_CHAR(INPT_DT, 'YYYY-MM-DD HH24:MI:SS') INPT_DT_STR
+			, TO_CHAR(LAST_CHG_DT, 'YYYY-MM-DD HH24:MI:SS') LAST_CHG_DT_STR
+			, USR_IP
+			, SESSION_ID
+			, URI
+			, PARAM
+			, RESULT
+		FROM 
+			EVA_HIS
+		WHERE
+			HIS_NO = #{HIS_NO}
+	</select>
+    
+    <select id="getUnivList" resultType="map" flushCache="true" useCache="false">
+		SELECT 
+			SBJT.UNIV_CD
+			, UNIV.UNIV_NM
+			, UNIV.UNIV_TYPE_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = UNIV.UNIV_TYPE_CD) UNIV_TYPE_NM
+			, UNIV.EVA_TARGET EVA_TARGET
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = UNIV.EVA_TARGET) EVA_TARGET_NM
+		FROM EVA_SCSBJT SBJT
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+		GROUP BY SBJT.UNIV_CD, UNIV.UNIV_NM, UNIV.UNIV_TYPE_CD, UNIV.EVA_TARGET
+		ORDER BY UNIV.UNIV_NM
+	</select>
+	
+	<select id="getUnivListParamUnivCd" resultType="map" parameterType="String" flushCache="true" useCache="false">
+		SELECT 
+			UNIV.UNIV_CD
+			, UNIV.UNIV_NM
+			, UNIV.UNIV_TYPE_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = UNIV.UNIV_TYPE_CD) UNIV_TYPE_NM
+		FROM EVA_UNIV UNIV
+		WHERE
+			UNIV.UNIV_CD = #{value}
+	</select>
+	
+	<select id="getUnivNm" resultType="String" parameterType="String"   flushCache="true" useCache="false">
+		SELECT 
+			UNIV_NM
+		FROM
+			EVA_UNIV
+		WHERE
+			UNIV_CD = #{univCd}
+	</select>
+	
+	<select id="getUnivInfo" resultType="map" parameterType="String"   flushCache="true" useCache="false">
+		SELECT 
+			UNIV_CD
+			, UNIV_NM
+			, DOMAIN
+			, EVA_TARGET
+			, UNIV_TYPE_CD
+		FROM
+			EVA_UNIV
+		WHERE
+			UNIV_CD = #{univCd}
+	</select>
+	
+	<select id="getUsrNm" resultType="String" parameterType="String"   flushCache="true" useCache="false">
+		SELECT 
+			USR_NM
+		FROM
+			EVA_USR
+		WHERE
+			USR_NO = #{usrNo}
+	</select>
+	
+	<select id="getEvaTranCorsCd" resultType="String" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			CASE WHEN #{univCd} || #{scsbjtNo} = #{univCd} || '-9999' THEN '99999999'
+				ELSE TRAN_CORS_CD
+			END	TRAN_CORS_CD		
+		FROM
+			EVA_SCSBJT2
+		WHERE
+			SCSBJT_NO = #{scsbjtNo}
+			AND UNIV_CD = #{univCd}
+	</select>
+	
+	<select id="getUnivTranCorsCdList" resultType="map" parameterType="String"   flushCache="true" useCache="false">
+		SELECT 
+			TRAN_CORS_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = SBJT.TRAN_CORS_CD) TRAN_CORS_NM
+		FROM EVA_SCSBJT SBJT
+		WHERE
+			UNIV_CD = #{value}
+			AND ABOL_YN = 'N'
+		GROUP BY
+			TRAN_CORS_CD
+		ORDER BY
+			TRAN_CORS_CD
+	</select>
+	
+	<select id="getFilterTranCorsCdList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			TRAN_CORS_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = SBJT.TRAN_CORS_CD) TRAN_CORS_NM
+		FROM EVA_SCSBJT SBJT
+		<where>
+			<if test="univCd != null and univCd != ''">
+				SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="abolYn != null and abolYn != ''">
+				AND SBJT.ABOL_YN = #{abolYn}
+			</if>
+		</where>
+		GROUP BY
+			TRAN_CORS_CD
+		ORDER BY
+			TRAN_CORS_CD
+	</select>
+	
+	<select id="getFilterScsbjtList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			SCSBJT_NO
+			, SCSBJT_NM
+		FROM
+		(
+			
+			SELECT 
+				SCSBJT_NO
+				, CASE WHEN SBJT.ABOL_YN = 'Y' THEN '(폐지) ' || SBJT.SCSBJT_NM
+					ELSE SBJT.SCSBJT_NM END SCSBJT_NM
+				, SBJT.ABOL_YN
+			FROM
+				EVA_SCSBJT SBJT
+			<where>
+				SBJT.UNIV_CD = #{univCd}
+				AND SBJT.TRAN_CORS_CD = #{tranCorsCd}
+				<if test="abolYn != null and abolYn != ''">
+					AND SBJT.ABOL_YN = #{abolYn}
+				</if>
+			</where>
+		) A
+		ORDER BY
+			CASE WHEN ABOL_YN = 'N' THEN '1' ELSE '2' END
+			, SCSBJT_NM
+			, SCSBJT_NO
+	</select>
+	
+	<select id="getUnivScsbjtList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			SBJT.SCSBJT_NO
+			, SBJT.SCSBJT_NM			
+		FROM EVA_SCSBJT SBJT
+			LEFT OUTER JOIN 
+				(
+					SELECT 
+						P_NUM
+						, APRV_REQ_NO
+						, SCSBJT_NO
+						, APRV_REQ_CD
+						, APRV_REQ_REASON
+						, APRV_YNCW
+						, APRV_REASON
+						, OFFIC_DOC_RCV_DT
+						, RST_NOTIFC_DT
+						, REQ_DT
+						, REQ_ID
+						, INPT_DT
+						, INPT_ID
+					FROM 
+					(
+						SELECT
+							ROW_NUMBER() OVER (PARTITION BY SCSBJT_NO ORDER BY APRV_REQ_NO DESC) P_NUM	
+							, APRV_REQ_NO	
+							, SCSBJT_NO
+							, APRV_REQ_CD
+							, APRV_REQ_REASON
+							, APRV_YNCW
+							, APRV_REASON
+							, TO_CHAR(OFFIC_DOC_RCV_DT, 'YYYY.MM.DD HH24:MI') OFFIC_DOC_RCV_DT
+							, TO_CHAR(RST_NOTIFC_DT, 'YYYY.MM.DD HH24:MI') RST_NOTIFC_DT
+							, TO_CHAR(REQ_DT, 'YYYY.MM.DD HH24:MI') REQ_DT
+							, REQ_ID
+							, TO_CHAR(INPT_DT, 'YYYY.MM.DD HH24:MI') INPT_DT
+							, INPT_ID						
+						FROM
+							EVA_SCSBJT_APRV_REQ
+						WHERE
+							TO_CHAR(INPT_DT, 'YYYY') = TO_CHAR(SYSDATE, 'YYYY') --해당연도의 마지막 요청값을 가져옴
+					)
+					WHERE 
+						P_NUM = 1
+						AND APRV_YNCW = 'W'
+				) REQ
+				ON SBJT.SCSBJT_NO = REQ.SCSBJT_NO
+		WHERE
+			SBJT.UNIV_CD = #{univCd}
+			<if test="tranCorsCd != null and tranCorsCd != ''">
+				AND SBJT.TRAN_CORS_CD = #{tranCorsCd}
+			</if>
+			<if test="abolYn != null and abolYn != ''">
+				AND SBJT.ABOL_YN = #{abolYn}
+				AND REQ.APRV_REQ_NO IS NULL
+			</if>
+		ORDER BY
+			SBJT.SCSBJT_NM
+	</select>
+	
+	<select id="isExistScsbjtInUniv" resultType="java.lang.Boolean" flushCache="true" useCache="false">
+		SELECT COUNT(*) FROM EVA_SCSBJT WHERE UNIV_CD = #{univCd} AND SCSBJT_NO = #{scsbjtNo}
+	</select>
+	
+	<select id="isExistScsbjt2InUniv" resultType="java.lang.Boolean" flushCache="true" useCache="false">
+		SELECT COUNT(*) FROM EVA_SCSBJT2 WHERE UNIV_CD = #{univCd} AND SCSBJT_NO = #{scsbjtNo}
+	</select>
+	
+	<insert id="insertDataMap" parameterType="map">
+   
+        INSERT INTO EVA_DATA_MAP (
+        	GROUP_CD, MAIN_CODE, SUB_CODE, SPARE1, SPARE2, SPARE3, INPT_DT, INPT_ID
+        ) VALUES (
+        	#{groupCd}, #{mainCode}, #{subCode}, #{spare1}, #{spare2}, #{spare3}, sysdate, #{sessUsrId}
+        )
+    </insert>
+    
+    <insert id="deleteDataMapBySubCode" parameterType="map">
+   
+        DELETE FROM EVA_DATA_MAP
+        WHERE
+        	GROUP_CD = #{groupCd}
+        	AND SUB_CODE = #{subCode}
+
+    </insert>
+	
+	<update id="updateDelFlag" >
+		UPDATE EVA_FILE
+		SET	DEL_YN = 'Y'
+		WHERE
+			FILE_ID = #{fileId}
+	</update>
+	
+	<select id="getTargetTranCorsCdList" resultType="map" parameterType="String"   flushCache="true" useCache="false">
+		SELECT 
+			SBJT.TRAN_CORS_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = SBJT.TRAN_CORS_CD) TRAN_CORS_NM
+		FROM EVA_SCSBJT SBJT
+			LEFT OUTER JOIN EVA_TARGET_SCSBJT_REQ TREQ
+				ON SBJT.SCSBJT_NO = TREQ.SCSBJT_NO
+				AND TREQ.CYCL = #{cycl}
+		<where>
+			<if test="univCd != null and univCd != ''">
+				SBJT.UNIV_CD = #{univCd}
+			</if>
+			AND SBJT.ABOL_YN = 'N'
+			AND TREQ.APRV_YN = 'Y'
+		</where>
+		GROUP BY
+			SBJT.TRAN_CORS_CD
+		ORDER BY
+			SBJT.TRAN_CORS_CD
+	</select>
+	
+	<select id="getTargetScsbjtList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			SBJT.SCSBJT_NO
+			, SBJT.SCSBJT_NM
+		FROM
+			EVA_SCSBJT SBJT
+			LEFT OUTER JOIN EVA_TARGET_SCSBJT_REQ TREQ
+				ON SBJT.SCSBJT_NO = TREQ.SCSBJT_NO
+				AND TREQ.CYCL = #{cycl}
+		<where>
+			SBJT.UNIV_CD = #{univCd}
+			AND SBJT.TRAN_CORS_CD = #{tranCorsCd}
+			AND SBJT.ABOL_YN = 'N'
+			AND TREQ.APRV_YN = 'Y'
+		</where>
+		ORDER BY
+			SBJT.SCSBJT_NM
+			, SBJT.SCSBJT_NO
+	</select>
+	
+	<insert id="insertCurLoginUsr" parameterType="map">
+        INSERT INTO EVA_LOGIN_USR (
+        	SESSION_ID, USR_NO, USR_ID, USR_NM, USR_PERM_NM, UNIV_NM, PIC_NO, INPT_DT, LAST_ACCESS_DT, MAX_INTERVAL
+        ) VALUES (
+        	#{sessId}, #{usrNo}, #{usrId}, #{usrNm}, #{usrPermNm}, #{univNm}, #{picNo}, sysdate, sysdate, #{maxInterval}
+        )
+    </insert>
+    
+    <update id="updateCurLoginUsr" parameterType="map">
+        UPDATE EVA_LOGIN_USR
+        SET LAST_ACCESS_DT = SYSDATE
+        WHERE
+        	SESSION_ID = #{sessId}
+        	AND USR_NO = #{usrNo}
+			<if test="picNo != null and picNo != ''">
+				AND PIC_NO = #{picNo}
+			</if>        	
+    </update>
+    
+     <select id="getCurLoginInfo" resultType="map" parameterType="map"   flushCache="true" useCache="false">    
+        SELECT
+        	SESSION_ID
+        	, USR_NO
+        	, USR_ID
+        	, USR_NM
+        	, USR_PERM_NM
+        	, UNIV_NM
+        	, CERT_NUM
+        	, INPT_DT
+        	, LAST_ACCESS_DT
+        FROM 
+        	EVA_LOGIN_USR 
+        WHERE
+        	SESSION_ID = #{sessId} 
+        	AND USR_NM = #{usrNm}
+    </select>
+    
+    <select id="isExistCurLoginUsr" resultType="Boolean" parameterType="map"   flushCache="true" useCache="false">    
+        SELECT
+        	COUNT(*)
+        FROM 
+        	EVA_LOGIN_USR 
+        WHERE
+        	SESSION_ID = #{sessId} 
+        	AND USR_NO = #{usrNo}
+			<if test="picNo != null and picNo != ''">
+				AND PIC_NO = #{picNo}
+			</if>  
+    </select>
+    
+    <delete id="deleteCurLoginUsr" >        
+      	DELETE FROM EVA_LOGIN_USR WHERE 
+         NOT (((SYSDATE-LAST_ACCESS_DT) * (24 * 60 * 60)) BETWEEN 0 AND MAX_INTERVAL)
+    </delete>
+	
+	<delete id="deleteCurLoginUsrImmediateSession" parameterType="String"  >        
+      	DELETE FROM EVA_LOGIN_USR WHERE SESSION_ID = #{value} 
+    </delete>
+    
+    <delete id="deleteCurLoginUsrImmediateUsr" parameterType="map"  >        
+      	DELETE FROM EVA_LOGIN_USR 
+      	<where>      		
+	      	USR_NO = #{usrNo}
+			<if test="picNo != null and picNo != ''">
+				AND PIC_NO = #{picNo}
+			</if>   
+		</where>
+    </delete>
+    
+    <select id="getEvaYearList" resultType="String" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			YEAR 
+		FROM EVA_METRICS_MAP M
+			INNER JOIN EVA_SCSBJT2 SBJT
+			ON M.SCSBJT_NO = SBJT.SCSBJT_NO
+				AND SBJT.LAST_YN = 'Y'
+				AND SBJT.CYCL_CD = #{cyclCd}
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD				
+			INNER JOIN EVA_METRICS METRIC
+				ON M.METRIC_CD = METRIC.METRIC_CD
+		<where>
+			<if test="univCd != null and univCd != ''">
+				AND SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="evaTargetCd != null and evaTargetCd != ''">
+				AND UNIV.EVA_TARGET =#{evaTargetCd}
+			</if>
+			<if test="metricNm != null and metricNm != ''">
+				AND METRIC.METRIC_NM =#{metricNm}
+			</if>
+			<if test="metricCd != null and metricCd != ''">
+				AND METRIC.METRIC_CD =#{metricCd}
+			</if>
+		</where>
+		GROUP BY YEAR
+		ORDER BY YEAR
+	</select>
+    
+    <select id="getEvaCalcYearList" resultType="String" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			CALC_YEAR 
+		FROM EVA_METRICS_MAP M
+			INNER JOIN EVA_SCSBJT2 SBJT
+			ON M.SCSBJT_NO = SBJT.SCSBJT_NO
+				AND SBJT.LAST_YN = 'Y'
+				AND SBJT.CYCL_CD = #{cyclCd}
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+		<where>
+			CALC_YEAR IS NOT NULL
+			<if test="univCd != null and univCd != ''">
+				AND SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="evaTargetCd != null and evaTargetCd != ''">
+				AND UNIV.EVA_TARGET =#{evaTargetCd}
+			</if>
+		</where>
+		GROUP BY CALC_YEAR
+		ORDER BY CALC_YEAR
+	</select>
+	
+	<select id="getEvaTargetList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			UNIV.EVA_TARGET CODE
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = UNIV.EVA_TARGET) CODE_NM 
+		FROM EVA_SCSBJT2 SBJT
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+		WHERE
+			SBJT.LAST_YN = 'Y'
+			AND SBJT.CYCL_CD = #{cyclCd}
+		GROUP BY UNIV.EVA_TARGET
+		ORDER BY UNIV.EVA_TARGET
+	</select>
+	
+	<select id="getEvaUnivList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			UNIV.UNIV_CD, UNIV.UNIV_NM 
+		FROM 
+			EVA_SCSBJT2 SBJT
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+			<if test='usrPerm.equals("Q") or usrPerm.equals("L")'>
+			INNER JOIN EVA_UNIV_PERM_MAP UPMAP
+				ON UPMAP.UNIV_CD = UNIV.UNIV_CD
+				AND UPMAP.MENU_ID = #{menuId}
+			INNER JOIN EVA_USR USR
+				ON UPMAP.UNIV_PERM_NM = USR.UNIV_PERM_NM
+				AND USR.USR_NO = #{usrNo}				
+			</if>
+		WHERE
+			SBJT.LAST_YN = 'Y'
+			AND SBJT.CYCL_CD = #{cyclCd}
+			<if test="univCd != null and univCd != ''">
+				AND SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="evaTargetCd != null and evaTargetCd != ''">
+				AND UNIV.EVA_TARGET =#{evaTargetCd}
+			</if>
+		GROUP BY UNIV.UNIV_CD, UNIV.UNIV_NM 
+		ORDER BY UNIV.UNIV_NM 
+	</select>
+	
+	<select id="getEvaTranCorsList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			SBJT.TRAN_CORS_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = SBJT.TRAN_CORS_CD) TRAN_CORS_NM
+		FROM EVA_METRICS_MAP M
+			INNER JOIN EVA_SCSBJT2 SBJT
+			ON M.SCSBJT_NO = SBJT.SCSBJT_NO
+				AND SBJT.LAST_YN = 'Y'
+				AND SBJT.CYCL_CD = #{cyclCd}
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+		<where>
+			<if test="univCd != null and univCd != ''">
+				AND SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="evaTargetCd != null and evaTargetCd != ''">
+				AND UNIV.EVA_TARGET =#{evaTargetCd}
+			</if>
+		</where>
+		GROUP BY SBJT.TRAN_CORS_CD
+		ORDER BY SBJT.TRAN_CORS_CD
+	</select>
+	
+	<select id="getEvaScsbjtList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			SBJT.SCSBJT_NO
+			, SBJT.SCSBJT_NM
+		FROM EVA_METRICS_MAP M
+			INNER JOIN EVA_SCSBJT2 SBJT
+			ON M.SCSBJT_NO = SBJT.SCSBJT_NO
+				AND SBJT.LAST_YN = 'Y'
+				AND SBJT.CYCL_CD = #{cyclCd}
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+		<where>
+			<if test="univCd != null and univCd != ''">
+				AND SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="tranCorsCd != null and tranCorsCd != ''">
+				AND SBJT.TRAN_CORS_CD = #{tranCorsCd}
+			</if>
+			<if test="evaTargetCd != null and evaTargetCd != ''">
+				AND UNIV.EVA_TARGET =#{evaTargetCd}
+			</if>
+		</where>
+		GROUP BY 
+			SBJT.SCSBJT_NO
+			, SBJT.SCSBJT_NM
+		ORDER BY SBJT.SCSBJT_NM
+	</select>
+    
+	<select id="getEvaGradTranCorsList" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT 
+			SBJT.TRAN_CORS_CD
+			, (SELECT CODE_NM FROM EVA_CODE WHERE CODE = SBJT.TRAN_CORS_CD) TRAN_CORS_NM
+		FROM EVA_METRICS_MAP M
+			INNER JOIN EVA_SCSBJT2 SBJT
+			ON M.SCSBJT_NO = SBJT.SCSBJT_NO
+				AND SBJT.LAST_YN = 'Y'
+				AND SBJT.CYCL_CD = #{cyclCd}
+			INNER JOIN EVA_UNIV UNIV
+				ON SBJT.UNIV_CD = UNIV.UNIV_CD
+		<where>
+			SBJT.TRAN_CORS_CD IN ('10060009', '10060010', '10060011', '10060012', '10060013')
+			<if test="univCd != null and univCd != ''">
+				AND SBJT.UNIV_CD = #{univCd}
+			</if>
+			<if test="evaTargetCd != null and evaTargetCd != ''">
+				AND UNIV.EVA_TARGET =#{evaTargetCd}
+			</if>
+		</where>
+		GROUP BY SBJT.TRAN_CORS_CD
+		ORDER BY SBJT.TRAN_CORS_CD
+	</select>
+	
+	<select id="getEvaTranCorsListForTch" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT
+			TRAN_CORS_CD
+			, TRAN_CORS_NM
+		FROM
+		(
+			SELECT 
+				TCH.TCH_NO 
+				, TCH.SCSBJT_NO
+				,  CASE 
+					WHEN SUBSTR(TCH.SCSBJT_NO , INSTR(TCH.SCSBJT_NO, '-') + 1, 4) = '9999' THEN  '99999999'
+					ELSE (SELECT TRAN_CORS_CD FROM EVA_SCSBJT2 WHERE SCSBJT_NO = TCH.SCSBJT_NO AND CYCL_CD = #{cyclCd})
+				END TRAN_CORS_CD
+			 , CASE 
+					WHEN SUBSTR(TCH.SCSBJT_NO , INSTR(TCH.SCSBJT_NO, '-') + 1, 4) = '9999' THEN  '기타'
+					ELSE (SELECT CODE_NM FROM EVA_CODE WHERE CODE = (SELECT TRAN_CORS_CD FROM EVA_SCSBJT2 WHERE SCSBJT_NO = TCH.SCSBJT_NO AND CYCL_CD = #{cyclCd}))
+				END TRAN_CORS_NM
+			FROM 
+				EVA_TCH TCH		
+				INNER JOIN EVA_UNIV UNIV
+					ON SUBSTR(TCH.TCH_NO,2,8) = UNIV.UNIV_CD
+			<where>
+				<if test="univCd != null and univCd != ''">
+					AND SUBSTR(TCH.TCH_NO,2,8) = #{univCd}
+				</if>
+				<if test="evaTargetCd != null and evaTargetCd != ''">
+					AND UNIV.EVA_TARGET =#{evaTargetCd}
+				</if>
+			</where>
+		)
+		GROUP BY
+			TRAN_CORS_CD , TRAN_CORS_NM
+		ORDER BY
+			TRAN_CORS_CD
+	</select>
+	
+	<select id="getEvaScsbjtListForTch" resultType="map" parameterType="map"   flushCache="true" useCache="false">
+		SELECT
+			SCSBJT_NO
+			, SCSBJT_NM
+		FROM
+		(
+			SELECT 
+				TCH.TCH_NO 
+				, TCH.SCSBJT_NO
+				, CASE 
+					WHEN SUBSTR(TCH.SCSBJT_NO , INSTR(TCH.SCSBJT_NO, '-') + 1, 4) = '9999' THEN  TCH.SCSBJT_NM_DIRECT
+					ELSE 
+						 (SELECT SCSBJT_NM FROM EVA_SCSBJT2 WHERE SCSBJT_NO = TCH.SCSBJT_NO AND CYCL_CD = #{cyclCd})
+					END	SCSBJT_NM
+			FROM 
+				EVA_TCH TCH		
+				INNER JOIN EVA_UNIV UNIV
+					ON SUBSTR(TCH.TCH_NO,2,8) = UNIV.UNIV_CD
+			<where> 
+				<if test="univCd != null and univCd != ''">
+					AND SUBSTR(TCH.TCH_NO,2,8) = #{univCd}
+				</if>
+				<if test="evaTargetCd != null and evaTargetCd != ''">
+					AND UNIV.EVA_TARGET =#{evaTargetCd}
+				</if>
+				<if test="tranCorsCd != null and tranCorsCd != ''">
+					<choose>
+					<when test="tranCorsCd == '99999999'">
+					AND TCH.SCSBJT_NM_DIRECT IS NOT NULL
+					</when>
+					<otherwise>
+					AND (SELECT TRAN_CORS_CD FROM EVA_SCSBJT2 WHERE SCSBJT_NO = TCH.SCSBJT_NO AND CYCL_CD = #{cyclCd}) = #{tranCorsCd} 
+					</otherwise>
+					</choose>
+				</if>
+			</where>
+		)
+		GROUP BY
+			SCSBJT_NO , SCSBJT_NM
+		ORDER BY
+			SCSBJT_NM
+	</select>
+	
+	<select id="getMenuNm" resultType="String" parameterType="String" flushCache="true" useCache="false">
+		SELECT MENU_NM FROM EVA_MENU WHERE MENU_ID = #{value}
+	</select>
+	
+		
+</mapper>

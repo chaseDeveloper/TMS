@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.main.maps.MainMapper">
+
+		
+	<select id="selectPoolScheList" parameterType="map" resultType="map" flushCache="false">
+		
+		SELECT *
+			FROM (
+			     SELECT 
+			        ROW_NUMBER() OVER (ORDER BY A.EVA_YEAR, A.POOL_CD) R_NUM,
+			        A.PERIOD_DIV_CD,
+			        A.EVA_YEAR,
+			        A.POOL_CD,
+                    EC.CODE_NM AS POOL_CODE_NM,
+			        A.POOL_CD_NM,
+			        TO_CHAR(TO_DATE(SUBSTR(A.ST_DT, 1, 12), 'YYYYMMDDHH24MI'), 'YYYY"년" MM"월" DD"일" HH24"시" MI"분"') AS ST_YMD,
+        			TO_CHAR(TO_DATE(SUBSTR(A.ED_DT, 1, 12), 'YYYYMMDDHH24MI'), 'YYYY"년" MM"월" DD"일" HH24"시" MI"분"') AS ED_YMD,
+      		        A.STATUS_CD
+			    FROM EVA_POOL_SCHE A
+                LEFT JOIN
+                    EVA_CODE EC ON A.POOL_CD = EC.ORG_CD AND EC.GROUP_CD = 'POOL_CD'      
+			    WHERE A.STATUS_CD = 'Y'
+		 ) 
+		 <!--  WHERE 
+		  R_NUM BETWEEN #{start_no} AND #{last_no} -->
+	</select>
+	
+	
+	<select id="isExistPoolDi" parameterType="map" resultType="boolean" useCache="false" flushCache="false">
+		SELECT
+			COUNT(*)
+		FROM
+			EVA_POOL_M 
+		WHERE
+			DI = #{di}
+	</select>
+	
+	<select id="getPoolInfo" parameterType="String" resultType="map">
+		SELECT
+			A.DI	   
+			,A.USR_ID
+			,A.ROLE
+			,A.PRIV_YN
+			,A.PRIV_DTTM
+			,A.QUAN_YN
+			,A.QUAL_YN
+			,A.DISQ_YN_1
+			,A.DISQ_UNIV_CD_1
+			,A.DISQ_YN_2
+			,A.DISQ_UNIV_CD_2
+			,A.NAME
+			,A.GENDER
+			,A.TEL_HP
+			,A.TEL_HOME
+			,A.BIRTHDAY
+			,A.ADDR_HOME_ZIPCODE
+			,A.ADDR_HOME
+			,A.ADDR_HOME_DETAIL
+			,A.UNIV_CD
+			,(SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = A.UNIV_CD) AS UNIV_CD_NM
+			,A.JOB_NM
+			,A.POSITION
+			,A.DEPT
+			,A.EMAIL
+			,A.ADDR_JOB_ZIPCODE
+			,A.ADDR_JOB
+			,A.ADDR_JOB_DETAIL
+			,A.TEL_JOB
+			,A.RESUME_1
+			,A.RESUME_2
+			,A.EDU_DIV
+			,A.JOB_CD
+			,A.UNIV_DIV
+			,A.DEL_YN
+			,A.INPT_ID
+			,A.INPT_DT
+			,A.LAST_CHNRG_ID
+			,A.LAST_CHG_DT
+			,A.IP
+		FROM
+		    EVA_POOL_M A 
+		WHERE	
+			A.DI = #{di}		
+	</select>
+	
+	<select id="getPoolDegreeInfo" parameterType="String" resultType="map">
+		SELECT
+			DI
+			,USR_ID
+			,SEQ
+			,EDU_YM
+			,UNIV_CD
+			,UNIV_NM
+			,LOC_CD
+			,LOC_CD_NM
+			,DEG_CD
+			,DEG_CD_NM
+			,MAJOR
+			,DEL_YN
+			,INPT_ID
+			,INPT_DT
+			,LAST_CHNRG_ID
+			,LAST_CHG_DT
+		FROM
+		    EVA_POOL_DEGREE 
+		WHERE	
+			DI = #{di}		
+	</select>
+	
+	<select id="getPoolFulltimeInfo" parameterType="String" resultType="map">
+		SELECT
+			DI
+			,USR_ID
+			,SEQ
+			,JOB_ST_YM
+			,JOB_ED_YM
+			,UNIV_CD
+			,UNIV_NM
+			,DEPT
+			,DEL_YN
+			,INPT_ID
+			,INPT_DT
+		FROM
+		    EVA_POOL_FULLTIME_TEACHER 
+		WHERE	
+			DI = #{di}		
+	</select>
+	
+	<select id="getPoolInfoAdmin" parameterType="String" resultType="map">
+		SELECT
+			A.DI	   
+			,A.USR_ID
+			,A.ROLE
+			,A.PRIV_YN
+			,A.PRIV_DTTM
+			,A.QUAN_YN
+			,A.QUAL_YN
+			,A.DISQ_YN_1
+			,A.DISQ_UNIV_CD_1
+			,A.DISQ_YN_2
+			,A.DISQ_UNIV_CD_2
+			,A.NAME
+			,A.GENDER
+			,A.TEL_HP
+			,A.TEL_HOME
+			,A.BIRTHDAY
+			,A.ADDR_HOME_ZIPCODE
+			,A.ADDR_HOME
+			,A.ADDR_HOME_DETAIL
+			,A.UNIV_CD
+			,(SELECT DISTINCT UNIV_NM FROM E6_EDNST_ADDR_M WHERE UNIV_CD = A.UNIV_CD) AS UNIV_CD_NM
+			,A.JOB_NM
+			,A.POSITION
+			,A.DEPT
+			,A.EMAIL
+			,A.ADDR_JOB_ZIPCODE
+			,A.ADDR_JOB
+			,A.ADDR_JOB_DETAIL
+			,A.TEL_JOB
+			,A.RESUME_1
+			,A.RESUME_2
+			,A.EDU_DIV
+			,A.JOB_CD
+			,A.UNIV_DIV
+			,A.DEL_YN
+			,A.INPT_ID
+			,A.INPT_DT
+			,A.LAST_CHNRG_ID
+			,A.LAST_CHG_DT
+			,A.IP
+		FROM
+		    EVA_POOL_M A 
+		WHERE	
+			A.USR_ID = #{usrId}	
+		AND A.ROLE = 'A'	
+	</select>
+	
+	
+	
+		
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+
+<mapper namespace="tms.poolResult.maps.PoolResultMapper">
+	
+	<resultMap id="sign_clob" type="Map">
+   	 	<result property="SIGN_1" column="SIGN_1" jdbcType="CLOB" javaType="java.lang.String" />
+	</resultMap>	
+		
+	<select id="selectPoolResultList" parameterType="map" resultMap="sign_clob">
+			  							
+		SELECT B.DI,A.PERIOD_DIV_CD, A.EVA_YEAR, A.POOL_CD,EC.CODE_NM, A.POOL_CD_NM
+		     , B.NAME, B.USR_ID, A.ST_DT, A.ED_DT, B.APPL_YN, TO_CHAR(B.APPL_YN_DT, 'YYYY-MM-DD HH24:MI') AS APPL_YN_DT
+             , B.SEL_RSLT ,B.SEC_PLEDGE_YN , TO_CHAR(B.SEC_PLEDGE_YN_DT, 'YYYY-MM-DD HH24:MI') AS SEC_PLEDGE_YN_DT,A.STATUS_CD
+             , B.SIGN_1             
+		  FROM EVA_POOL_SCHE A	           
+          LEFT OUTER JOIN EVA_POOL_APPL B
+		         ON (  A.PERIOD_DIV_CD = B.PERIOD_DIV_CD
+                       AND A.EVA_YEAR = B.EVA_YEAR
+		               AND A.POOL_CD = B.POOL_CD		               
+		            )
+		  LEFT JOIN
+		    EVA_CODE EC ON A.POOL_CD = EC.ORG_CD AND EC.GROUP_CD = 'POOL_CD'            
+          WHERE  B.USR_ID =  #{usrId}
+          		 AND B.DI = #{di}
+                 AND B.APPL_YN ='Y'
+          ORDER BY A.PERIOD_DIV_CD,A.EVA_YEAR,A.POOL_CD      
+          
+	</select>	
+	
+	<update id="saveSign" parameterType="map" flushCache="true">
+		UPDATE EVA_POOL_APPL
+		    SET SIGN_1	 		= #{sign1, jdbcType=CLOB}	
+		    ,SEC_PLEDGE_YN      = 'Y'    
+		    ,SEC_PLEDGE_YN_DT   = SYSDATE	
+		WHERE 
+	 		 DI = #{di}
+	 		 AND USR_ID = #{usrId}   		
+	 		 AND PERIOD_DIV_CD = #{periodDivCd}
+		     AND EVA_YEAR = #{evaYear}
+		     AND POOL_CD = #{poolCd}
+		    
+		    
+	</update>
+	
+	<select id="getpoolCd" parameterType="map" resultType="map">		
+		SELECT			
+		      CODE                
+             , CODE_NM             
+             , ORG_CD				  
+        FROM 
+        	EVA_CODE
+        WHERE 
+        	GROUP_CD ='POOL_CD'
+            AND ORG_CD = #{poolCd}
+	</select>
+	
+		
+</mapper>

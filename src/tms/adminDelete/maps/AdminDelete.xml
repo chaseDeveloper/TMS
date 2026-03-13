@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="tms.adminDelete.maps.AdminDeleteMapper">
+	<select id="getAdminDeleteList" parameterType="map" resultType="map">
+	    SELECT 
+	        A.*, 
+	        TO_CHAR(A.DEL_DT, 'YYYY-MM-DD HH24:MI:SS') AS DEL_DT_FORMATTED
+	    FROM EVA_POOL_M_DEL A
+	    WHERE 1=1  <!-- WHERE 절이 항상 존재하도록 설정 -->
+	
+	    <!-- 날짜 필터링 (값이 있을 때만 적용) -->
+	    <if test="sStartDate != null and sStartDate != '' and sEndDate != null and sEndDate != ''">
+	        AND A.DEL_DT BETWEEN TO_DATE(#{sStartDate}, 'YYYY-MM-DD HH24:MI:SS')
+	                         AND TO_DATE(#{sEndDate}, 'YYYY-MM-DD HH24:MI:SS')
+	    </if>
+	
+	    <!-- NAME 필터링 (값이 있을 때만 적용) -->
+	    <if test="sNameEmail != null and sNameEmail != ''">
+	        AND A.NAME LIKE '%' || #{sNameEmail} || '%'
+	    </if>
+	
+	    ORDER BY A.DEL_DT DESC 
+	</select>
+</mapper>
