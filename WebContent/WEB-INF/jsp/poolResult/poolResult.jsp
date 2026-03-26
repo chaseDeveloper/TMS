@@ -32,7 +32,7 @@
 									<col style="width:3%;" />
 									<col style="width:6%;" />
 									<col style="width:8%;" />
-									<col style="width:*" />
+									<col style="width:18%" />
 									<col style="width:*" />
 									<col style="width:12%;" />
 									<col style="width:7%;" />
@@ -187,7 +187,7 @@
 						    row.append($("<td>").data("evaYear", listData.EVA_YEAR).text(listData.EVA_YEAR + "년도"));
 						    row.append($("<td>").data("poolCd", listData.POOL_CD).css("display", "none").text(listData.POOL_CD));
 						    row.append($("<td>").data("poolCodeNm", listData.CODE_NM).text(listData.CODE_NM));
-						    var poolCdNmFormatted = listData.POOL_CD_NM.replace(/,/g, ',<br/>');
+				            var poolCdNmFormatted = listData.POOL_CD_NM.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/,/g, ',<br/>');
 				            row.append(
 				                $("<td>")
 				                    .data("poolCdNm", listData.POOL_CD_NM)

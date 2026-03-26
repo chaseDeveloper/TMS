@@ -15,7 +15,7 @@
 			        A.PERIOD_DIV_CD,
 			        A.EVA_YEAR,
 			        A.POOL_CD,
-                    EC.CODE_NM AS POOL_CODE_NM,
+                    EC.CODE_NM,
 			        A.POOL_CD_NM,
 			        TO_CHAR(TO_DATE(SUBSTR(A.ST_DT, 1, 12), 'YYYYMMDDHH24MI'), 'YYYY"년" MM"월" DD"일" HH24"시" MI"분"') AS ST_YMD,
         			TO_CHAR(TO_DATE(SUBSTR(A.ED_DT, 1, 12), 'YYYYMMDDHH24MI'), 'YYYY"년" MM"월" DD"일" HH24"시" MI"분"') AS ED_YMD,
@@ -28,7 +28,6 @@
 		 <!--  WHERE 
 		  R_NUM BETWEEN #{start_no} AND #{last_no} -->
 	</select>
-	
 	
 	<select id="isExistPoolDi" parameterType="map" resultType="boolean" useCache="false" flushCache="false">
 		SELECT

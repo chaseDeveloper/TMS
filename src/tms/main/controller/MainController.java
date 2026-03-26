@@ -77,15 +77,12 @@ public class MainController {
 			}
 
 		}
-
 		return "/main/main";
 	}
 
 	@RequestMapping(value = "/selectPoolScheList.do")
 	public void getList(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
 		HashMap<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("start_no", "1");
 		paramMap.put("last_no", "3");
@@ -269,11 +266,8 @@ public class MainController {
 				} else {
 					hisparam.put("RMRK", "공모시스템 회원가입 위한 본인인증");
 				}
-
 				cmmnMapper.insertHis(hisparam);
-
 			}
-
 		} else if (iReturn == -1) {
 			sMessage = "복호화 시스템 오류입니다.";
 		} else if (iReturn == -4) {
@@ -419,11 +413,15 @@ public class MainController {
 				String role = (String) loginInfo.get("ROLE");
 				String di = (String) loginInfo.get("DI");
 				String ci = (String) loginInfo.get("CI");
-				
+				String clientIp = request.getHeader("X-Forwarded-For");
+				if (clientIp == null || clientIp.length() == 0 || "unknown".equalsIgnoreCase(clientIp)) {
+					clientIp = request.getRemoteAddr();
+				}
 				session.setAttribute("USR_ID",userId); 
 				session.setAttribute("ROLE", role);
 				session.setAttribute("DI", di);
 				session.setAttribute("CI", ci);
+				session.setAttribute("clientIp", clientIp);
 				
 				resultMap.put("result", "S");
 				resultMap.put("code", "0");
@@ -431,13 +429,12 @@ public class MainController {
 				resultMap.put("result", "F");	
 				resultMap.put("code", "1");
 			}
-			
 		} else {
 			resultMap.put("result", "F");	
 			resultMap.put("code", "2");
 		}
-		
-        Gson gson = new Gson();
+
+		Gson gson = new Gson();
         response.setContentType("application/json");
     	response.setCharacterEncoding("UTF-8");
     	response.getWriter().write(gson.toJson(resultMap));        

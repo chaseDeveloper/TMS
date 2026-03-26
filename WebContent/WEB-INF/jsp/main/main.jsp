@@ -111,7 +111,7 @@
 							<div class="img"><img alt="진단위원 선정 결과 알림 이미지" src="<%=request.getContextPath() %>/images/main_img_noti01.png"></div>
 							<div class="result">
 								<ul>
-									<li>진단위원 후보자신청 일정<span>진단위원 선정 결과는 개별 통보합니다.</span></li>
+									<li style="padding-left: 125px;margin: 0px;padding-right: 0px;">진단위원 선정 결과는 개별 통보합니다.</li>
 								</ul>
 							</div>
 							</div>							
@@ -168,8 +168,8 @@ function fn_getPoolScheList() {
 					
 					var scheduleList = '';
 					for(var i=0;i<list.length;i++) {
-						
-						scheduleList += '<li>'+ list[i].PERIOD_DIV_CD + '주기 ' +  list[i].EVA_YEAR + '진단년도 <br>' + list[i].POOL_CODE_NM + '<span>' +list[i].ST_YMD+ '~' +list[i].ED_YMD+ '</span></li>';
+			            var poolCdNmFormatted = list[i].POOL_CD_NM.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/,/g, '<br/>');
+						scheduleList += '<li style="padding: 40px 20px;">' + list[i].CODE_NM + '<br/><br/><span>' + poolCdNmFormatted + '</span></li>';
 					}
 					scheduleList += '';
 					$("#scheduleList").html("");
