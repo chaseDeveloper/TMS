@@ -54,7 +54,7 @@
 		ORDER BY
 		    A.PERIOD_DIV_CD DESC,
 		    A.EVA_YEAR DESC,
-		    A.POOL_CD DESC
+		    EC.CODE_NM DESC
 	</select>
 					
 	

@@ -112,7 +112,7 @@
 		    AND EC.GROUP_CD = 'POOL_CD'
 		WHERE A.STATUS_CD = 'Y'
 		    AND TO_CHAR(SYSDATE, 'YYYYMMDDHH24MI') BETWEEN A.ST_DT AND A.ED_DT
-		ORDER BY A.PERIOD_DIV_CD, A.EVA_YEAR, A.POOL_CD
+		ORDER BY A.PERIOD_DIV_CD DESC, A.EVA_YEAR DESC, EC.CODE_NM DESC
 	</select>
 
 	<select id="selectPoolApplList2" parameterType="map" resultType="map">
@@ -143,10 +143,7 @@
 		WHERE A.STATUS_CD = 'Y'
 		    AND TO_CHAR(SYSDATE, 'YYYYMMDDHH24MI') BETWEEN A.ST_DT AND A.ED_DT
 		    AND EC.CODE IN ('10520001', '10520003', '10520005')
-		ORDER BY 
-		    A.PERIOD_DIV_CD,
-		    A.EVA_YEAR,
-		    A.POOL_CD
+		ORDER BY A.PERIOD_DIV_CD DESC, A.EVA_YEAR DESC, EC.CODE_NM DESC
 	</select>
 
 	<select id="selectUsrJobCd" parameterType="map" resultType="string">

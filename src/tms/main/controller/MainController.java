@@ -133,8 +133,8 @@ public class MainController {
 
 		NiceID.Check.CPClient niceCheck = new NiceID.Check.CPClient();
 
-		String sSiteCode = "CC284"; // NICE로부터 부여받은 사이트 코드
-		String sSitePassword = "442z8I0k8orx "; // NICE로부터 부여받은 사이트 패스워드
+		String sSiteCode = "CI879"; // NICE로부터 부여받은 사이트 코드
+		String sSitePassword = "ZTKZyYEfoBjF "; // NICE로부터 부여받은 사이트 패스워드
 
 		String sRequestNumber = niceCheck.getRequestNO(sSiteCode); // 요청 번호, 이는 성공/실패후에 같은 값으로 되돌려주게 되므로
 
@@ -348,9 +348,9 @@ public class MainController {
 	}
 	
 
-	@RequestMapping("/adminLoginPage.do")
-	public String adminLoginPage(HttpServletRequest request, RedirectAttributes redirectAttributes) throws Exception {
-		HttpSession session = request.getSession();
+//	@RequestMapping("/adminLoginPage.do")
+//	public String adminLoginPage(HttpServletRequest request, RedirectAttributes redirectAttributes) throws Exception {
+//		HttpSession session = request.getSession();
 
 		// KediAES256Util aes256Util = new KediAES256Util();
 
@@ -393,9 +393,10 @@ public class MainController {
 		 * }
 		 */
 		
-		return "/main/adminLoginPage";
-	}
+//		return "/main/adminLoginPage";
+//	}
 	
+/*
 	@RequestMapping(value = "/adminLogin.do", method = RequestMethod.POST)
 	public void adminLogin(HttpServletRequest request, HttpServletResponse response, @RequestParam Map<String, Object> map) throws Exception {
 		HttpSession session = request.getSession();
@@ -438,114 +439,7 @@ public class MainController {
         response.setContentType("application/json");
     	response.setCharacterEncoding("UTF-8");
     	response.getWriter().write(gson.toJson(resultMap));        
-		
-		/*
-
-		NiceID.Check.CPClient niceCheck = new NiceID.Check.CPClient();
-
-		String sEncodeData = requestReplace((String) map.get("EncodeData"), "encodeData");
-		String sReserved1 = requestReplace((String) map.get("param_r1"), "");
-		String sReserved2 = requestReplace((String) map.get("param_r2"), "");
-		String sReserved3 = requestReplace((String) map.get("param_r3"), "");
-
-		String sSiteCode = "CC284"; // NICE로부터 부여받은 사이트 코드
-		String sSitePassword = "442z8I0k8orx "; // NICE로부터 부여받은 사이트 패스워드
-
-		String sCipherTime = ""; // 복호화한 시간
-		String sRequestNumber = ""; // 요청 번호
-		String sResponseNumber = ""; // 인증 고유번호
-		String sAuthType = ""; // 인증 수단
-		String sMessage = "";
-		String sPlainData = "";
-		String sName = "";
-		String sDupInfo = "";
-		String sConnInfo = "";
-		String sBirthDate = "";
-		String sGender = "";
-		String sMobileNo = "";
-		String sMobileCo = "";
-		String sNationalInfo = "";
-		String clientIp = request.getHeader("X-Forwarded-For");
-		if (clientIp == null || clientIp.length() == 0 || "unknown".equalsIgnoreCase(clientIp)) {
-			clientIp = request.getRemoteAddr();
-		}
-
-		int iReturn = niceCheck.fnDecode(sSiteCode, sSitePassword, sEncodeData);
-
-		if (iReturn == 0) {
-			sPlainData = niceCheck.getPlainData();
-			sCipherTime = niceCheck.getCipherDateTime();
-
-			// 데이타를 추출합니다.
-			HashMap mapresult = niceCheck.fnParse(sPlainData);
-
-			sRequestNumber = (String) mapresult.get("REQ_SEQ");
-			sResponseNumber = (String) mapresult.get("RES_SEQ");
-			sAuthType = (String) mapresult.get("AUTH_TYPE");
-			sName = (String) mapresult.get("NAME");
-			sBirthDate = (String) mapresult.get("BIRTHDATE");
-			sGender = (String) mapresult.get("GENDER");
-			sNationalInfo = (String) mapresult.get("NATIONALINFO");
-			sDupInfo = (String) mapresult.get("DI");
-			sConnInfo = (String) mapresult.get("CI");
-			sMobileNo = (String) mapresult.get("MOBILE_NO");
-			sMobileCo = (String) mapresult.get("MOBILE_CO");
-
-			HttpSession session = request.getSession();
-			String session_sRequestNumber = (String) request.getSession().getAttribute("REQ_SEQ");
-			if (!sRequestNumber.equals(session_sRequestNumber)) {
-				sMessage = "세션값 불일치 오류입니다.";
-
-			} else {
-
-				session.setAttribute("NAME", sName);
-				session.setAttribute("BIRTHDAY", sBirthDate);
-				session.setAttribute("GENDER", sGender);
-				session.setAttribute("DI", sDupInfo);
-				session.setAttribute("CI", sConnInfo);
-				session.setAttribute("TEL_HP", sMobileNo);
-				session.setAttribute("clientIp", clientIp);
-
-				String type = (String) session.getAttribute("type");
-
-				Map<String, Object> hisparam = new HashMap<String, Object>();
-				hisparam.put("MENU_NO", "P0001");
-				hisparam.put("MENU_NM", "공모 본인인증");
-				hisparam.put("WORK_TYPE", "조회");
-				hisparam.put("FUNC_NM", "공모 본인인증");
-				hisparam.put("PRIVACY_YN", 'N');
-
-				hisparam.put("RESULT_TYPE", 'S');
-				hisparam.put("sessUsrNm", sName);
-				hisparam.put("usrIp", clientIp);
-
-				if (type.equals("select")) {
-					hisparam.put("RMRK", "공모시스템 로그인 위한 본인인증");
-				} else {
-					hisparam.put("RMRK", "공모시스템 회원가입 위한 본인인증");
-				}
-
-				cmmnMapper.insertHis(hisparam);
-
-			}
-
-		} else if (iReturn == -1) {
-			sMessage = "복호화 시스템 오류입니다.";
-		} else if (iReturn == -4) {
-			sMessage = "복호화 처리 오류입니다.";
-		} else if (iReturn == -5) {
-			sMessage = "복호화 해쉬 오류입니다.";
-		} else if (iReturn == -6) {
-			sMessage = "복호화 데이터 오류입니다.";
-		} else if (iReturn == -9) {
-			sMessage = "입력 데이터 오류입니다.";
-		} else if (iReturn == -12) {
-			sMessage = "사이트 패스워드 오류입니다.";
-		} else {
-			sMessage = "알수 없는 에러 입니다. iReturn : " + iReturn;
-		}
-*/
-		
 	}
+*/
 
 }

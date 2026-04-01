@@ -64,7 +64,7 @@
 					<ul>
 						<li><a href="<%=request.getContextPath() %>/join/joinStep01.do">회원가입</a></li>
 						<li><a href="#" title="로그인" onclick="fnPopup()">로그인</a></li>
-						<li><a href="#" title="관리자로그인" onclick="location.href='<%=request.getContextPath()%>/main/adminLoginPage.do'">관리자로그인</a></li>
+<%-- 						<li><a href="#" title="관리자로그인" onclick="location.href='<%=request.getContextPath()%>/main/adminLoginPage.do'">관리자로그인</a></li> --%>
 					</ul>
 					</c:if>
 					<c:if test="${DI != null }">

@@ -26,8 +26,7 @@
           WHERE  B.USR_ID =  #{usrId}
           		 AND B.DI = #{di}
                  AND B.APPL_YN ='Y'
-          ORDER BY A.PERIOD_DIV_CD,A.EVA_YEAR,A.POOL_CD      
-          
+          ORDER BY A.PERIOD_DIV_CD DESC, A.EVA_YEAR DESC, EC.CODE_NM DESC
 	</select>	
 	
 	<update id="saveSign" parameterType="map" flushCache="true">
