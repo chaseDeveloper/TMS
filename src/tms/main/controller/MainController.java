@@ -44,9 +44,7 @@ public class MainController {
 	@RequestMapping("/main.do")
 	public String mainPage(HttpServletRequest request, RedirectAttributes redirectAttributes) throws Exception {
 		HttpSession session = request.getSession();
-
 		KediAES256Util aes256Util = new KediAES256Util();
-
 		String di = (String) session.getAttribute("DI");
 		String name = (String) session.getAttribute("NAME");
 
@@ -75,7 +73,6 @@ public class MainController {
 				request.getSession().invalidate();
 				return "redirect:/join/joinStep01.do";
 			}
-
 		}
 		return "/main/main";
 	}
@@ -190,8 +187,8 @@ public class MainController {
 		String sReserved2 = requestReplace((String) map.get("param_r2"), "");
 		String sReserved3 = requestReplace((String) map.get("param_r3"), "");
 
-		String sSiteCode = "CC284"; // NICE로부터 부여받은 사이트 코드
-		String sSitePassword = "442z8I0k8orx "; // NICE로부터 부여받은 사이트 패스워드
+		String sSiteCode = "CI879"; // NICE로부터 부여받은 사이트 코드
+		String sSitePassword = "ZTKZyYEfoBjF "; // NICE로부터 부여받은 사이트 패스워드
 
 		String sCipherTime = ""; // 복호화한 시간
 		String sRequestNumber = ""; // 요청 번호
@@ -239,7 +236,6 @@ public class MainController {
 				sMessage = "세션값 불일치 오류입니다.";
 
 			} else {
-
 				session.setAttribute("NAME", sName);
 				session.setAttribute("BIRTHDAY", sBirthDate);
 				session.setAttribute("GENDER", sGender);
