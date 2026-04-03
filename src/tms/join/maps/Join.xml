@@ -113,7 +113,7 @@
 		, GENDER  = #{gender}		
 		, BIRTHDAY  = #{birthDay}
 		, INPT_ID = #{sname}		
-		, INPT_DT = sysdate		
+		, INPT_DT = NVL(INPT_DT,sysdate)		
 		, LAST_CHG_DT = sysdate
 	 	WHERE 
 	 		TEL_HP   = #{telHp}

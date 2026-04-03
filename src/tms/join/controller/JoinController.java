@@ -159,7 +159,7 @@ public class JoinController {
 				  joinMapper.updatePoolFulltimeTeacher(param);	
 				  joinMapper.updatePoolEvaExp(param);	
 				  joinMapper.updatePoolInfo(param);	
-				  hisparam.put("RMRK","공모시스템 5주기 회원정보 업데이트 가입");
+				  hisparam.put("RMRK","공모시스템 26년 회원정보 업데이트 가입");
 				  hisparam.put("RESULT_TYPE",'S');
 				  hisparam.put("sessUsrNm",sname);		  
 				  hisparam.put("usrIp",clientIp);
@@ -185,12 +185,7 @@ public class JoinController {
 				  
 				  return "/join/joinStep03";
 			  }
-		 
 		  } 	  
-		  
-	       
 	 }
-	 
-
 	 
 }
